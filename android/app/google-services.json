@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "774381553854",
+    "project_id": "share-talks-c90cb",
+    "storage_bucket": "share-talks-c90cb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:774381553854:android:2fd426a3ab1a89ea4876ef",
+        "android_client_info": {
+          "package_name": "com.example.share_talks"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "774381553854-nm6mbc2trtbn31ad3chl4agvd242p4it.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQFemHCgJRUhrY-fOczzkELhIwcTHaYr4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "774381553854-nm6mbc2trtbn31ad3chl4agvd242p4it.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
