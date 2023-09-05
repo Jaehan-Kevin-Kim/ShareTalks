@@ -15,27 +15,7 @@ class ChatListScreen extends StatefulWidget {
 }
 
 class _ChatListScreenState extends State<ChatListScreen> {
-  // String userUid;
-  // var userDoc;
   String groupId = '';
-
-  // void getUserUid() {
-  //   userUid = FirebaseAuth.instance.currentUser!.uid;
-
-  //   // userDoc = fBF.collection('users').doc(userUid);
-  // }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-
-    // getUserUid();
-    // userUid = FirebaseAuth.instance.currentUser!.uid;
-    // userUid = firebaseUtils.currentUserUid;
-    super.initState();
-    // final userUid = FirebaseAuth.instance.currentUser!.uid;
-    // userDoc = fBF.collection('users').doc(userUid);
-  }
 
 //logic이 여기서 시작 함.
   Future<String> getGroupId(String opponentUid) async {
@@ -112,21 +92,44 @@ class _ChatListScreenState extends State<ChatListScreen> {
     return groupId;
   }
 
-  void _onClickSendMessage(String opponentUid) {
+  void _onClickSendMessage(List<String> otherUsersUid) {
     // await getGroupId(opponentUid);
     // print('next');
     Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => ChatScreen(opponentUid: opponentUid)));
+        builder: (context) => ChatScreen(otherUsersUid: otherUsersUid)));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ElevatedButton(
-          onPressed: () {
-            _onClickSendMessage('u4By9gLX5dgvOhuEELhzwCg07Iq2');
-          },
-          child: const Text('send a message')),
-    );
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Select friend'),
+        ),
+        body: FutureBuilder(
+            future: FirebaseFirestore.instance
+                .collection('users')
+                .doc(firebaseUtils.currentUserUid)
+                .get(),
+            builder: ((context, snapshot) {
+              if (snapshot.hasData) {
+                final groupData = snapshot.data!.data()!['group'];
+                // print(snapshot.data!.data()!['group']);
+                return ListView.builder(
+                    itemCount: groupData.length,
+                    itemBuilder: (ctx, index) => chatListItem());
+              }
+              return ElevatedButton(
+                  onPressed: () {
+                    _onClickSendMessage(['u4By9gLX5dgvOhuEELhzwCg07Iq2']);
+                  },
+                  child: const Text('send a message'));
+            })));
+    // Center(
+    //   child: ElevatedButton(
+    //       onPressed: () {
+    //         _onClickSendMessage(['u4By9gLX5dgvOhuEELhzwCg07Iq2']);
+    //       },
+    //       child: const Text('send a message')),
+    // );
   }
 }

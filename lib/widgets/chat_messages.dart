@@ -52,6 +52,7 @@ class _ChatMessagesState extends State<ChatMessages> {
               itemBuilder: ((context, index) {
                 return Column(
                   children: [
+                    Text('${loadedMessage[index]['senderName']}: '),
                     Text(loadedMessage[index]['text']),
                     Text('groupid: ${widget.groupId}')
                   ],

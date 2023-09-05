@@ -59,7 +59,7 @@ class _NewMessageState extends State<NewMessage> {
         'text': typedMessage,
         'senderId': authUser.uid,
         'senderImage': userData.data()!['image_url'],
-        'sendername': userData.data()!['username'],
+        'senderName': userData.data()!['username'],
       });
 
       final newChatData = await FirebaseFirestore.instance
