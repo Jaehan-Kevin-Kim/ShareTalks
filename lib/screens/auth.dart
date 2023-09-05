@@ -26,15 +26,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
   _onSubmit() async {
     final isValid = _formKey.currentState!.validate();
-    if (_selectedImage == null) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-        'Please add a photo!',
-        style: TextStyle(color: Colors.red),
-      )));
-      return;
-    }
 
     if (isValid) {
       _formKey.currentState!.save();
@@ -51,6 +42,15 @@ class _AuthScreenState extends State<AuthScreen> {
               await _firebaseAuth.signInWithEmailAndPassword(
                   email: _enteredEmail, password: _enteredPassword);
         } else {
+          if (_selectedImage == null) {
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text(
+              'Please add a photo!',
+              style: TextStyle(color: Colors.red),
+            )));
+            return;
+          }
           final userCredential =
               await _firebaseAuth.createUserWithEmailAndPassword(
                   email: _enteredEmail, password: _enteredPassword);

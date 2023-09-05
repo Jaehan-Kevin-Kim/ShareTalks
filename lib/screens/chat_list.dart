@@ -1,30 +1,29 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
-import 'package:share_talks/widgets/chat_messages.dart';
-import 'package:share_talks/widgets/new_message.dart';
 
+final fBF = FirebaseFirestore.instance;
 final firebaseUtils = FirebaseUtils();
 
-class ChatScreen extends StatefulWidget {
-  final String opponentUid;
-  const ChatScreen({super.key, required this.opponentUid});
+class ChatListScreen extends StatefulWidget {
+  const ChatListScreen({super.key});
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  State<ChatListScreen> createState() => _ChatListScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
-  late String userUid;
+class _ChatListScreenState extends State<ChatListScreen> {
+  // String userUid;
   // var userDoc;
   String groupId = '';
 
-  void getUserUid() {
-    userUid = FirebaseAuth.instance.currentUser!.uid;
+  // void getUserUid() {
+  //   userUid = FirebaseAuth.instance.currentUser!.uid;
 
-    // userDoc = fBF.collection('users').doc(userUid);
-  }
+  //   // userDoc = fBF.collection('users').doc(userUid);
+  // }
 
   @override
   void initState() {
@@ -32,13 +31,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // getUserUid();
     // userUid = FirebaseAuth.instance.currentUser!.uid;
-    userUid = firebaseUtils.currentUserUid;
+    // userUid = firebaseUtils.currentUserUid;
     super.initState();
     // final userUid = FirebaseAuth.instance.currentUser!.uid;
     // userDoc = fBF.collection('users').doc(userUid);
   }
 
-  Future<String> groupIdFuture(String opponentUid) async {
+//logic이 여기서 시작 함.
+  Future<String> getGroupId(String opponentUid) async {
+    String userUid = firebaseUtils.currentUserUid;
+    // String userUid = FirebaseAuth.instance.currentUser!.uid;
 //// ㄱㄱ새 코드
 ///// 1. 만약 user의 group이 empty array라면 새로 group 을 생성 해야 함.
     final usersData = await firebaseUtils.usersData(userUid);
@@ -110,43 +112,21 @@ class _ChatScreenState extends State<ChatScreen> {
     return groupId;
   }
 
+  void _onClickSendMessage(String opponentUid) {
+    // await getGroupId(opponentUid);
+    // print('next');
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => ChatScreen(opponentUid: opponentUid)));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Flutter Chat'),
-          actions: [
-            IconButton(
-              onPressed: () {
-                FirebaseAuth.instance.signOut();
-              },
-              icon: const Icon(Icons.exit_to_app),
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            )
-          ],
-        ),
-        body:
-            //  const Center(
-            //   child: Text("Logged In!"),
-            // ),
-            FutureBuilder(
-                future: groupIdFuture(widget.opponentUid),
-                builder: ((context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  }
-
-                  if (snapshot.hasData) {
-                    return Column(
-                      children: [
-                        // Text(widget.groupId),
-                        Expanded(child: ChatMessages(groupId: groupId)),
-                        NewMessage(),
-                      ],
-                    );
-                  } else {
-                    return Text('something wrong');
-                  }
-                })));
+    return Center(
+      child: ElevatedButton(
+          onPressed: () {
+            _onClickSendMessage('u4By9gLX5dgvOhuEELhzwCg07Iq2');
+          },
+          child: const Text('send a message')),
+    );
   }
 }

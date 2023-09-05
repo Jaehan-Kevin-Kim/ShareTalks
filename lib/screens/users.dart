@@ -47,6 +47,7 @@ class _UsersState extends State<Users> {
     groupId = createdGroup.id;
   }
 
+//logic이 여기서 시작 함.
   void _onClickSendMessage(String opponentUid) async {
     //먼저 나 찾기
     final userUid = FirebaseAuth.instance.currentUser!.uid;
