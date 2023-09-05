@@ -141,7 +141,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       children: [
                         // Text(widget.groupId),
                         Expanded(child: ChatMessages(groupId: groupId)),
-                        NewMessage(),
+                        NewMessage(
+                          groupId: groupId,
+                        ),
                       ],
                     );
                   } else {

@@ -2,8 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+final fBF = FirebaseFirestore.instance; //
+
 class NewMessage extends StatefulWidget {
-  const NewMessage({super.key});
+  final String groupId;
+  const NewMessage({super.key, required this.groupId});
 
   @override
   State<NewMessage> createState() => _NewMessageState();
@@ -11,6 +14,7 @@ class NewMessage extends StatefulWidget {
 
 class _NewMessageState extends State<NewMessage> {
   final _messageController = TextEditingController();
+  bool isSending = false;
 
   @override
   void dispose() {
@@ -35,22 +39,60 @@ class _NewMessageState extends State<NewMessage> {
     _messageController.clear();
     FocusScope.of(context).unfocus();
 
-    final authUser = FirebaseAuth.instance.currentUser!;
-    final userData = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(authUser.uid)
-        .get();
-    // print(authUser);
-    // print(userData);
-    // print(userData.data());
+    try {
+      final authUser = FirebaseAuth.instance.currentUser!;
+      final userData = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(authUser.uid)
+          .get();
 
-    await FirebaseFirestore.instance.collection('chat').add({
-      'createdAt': Timestamp.now(),
-      'text': typedMessage,
-      'userId': authUser.uid,
-      'userImage': userData.data()!['image_url'],
-      'username': userData.data()!['username'],
-    });
+      setState(() {
+        isSending = true;
+      });
+      // 1. Create a message by using groupId
+      final newChat = await FirebaseFirestore.instance
+          .collection('messages')
+          .doc(widget.groupId)
+          .collection('chats')
+          .add({
+        'createdAt': Timestamp.now(),
+        'text': typedMessage,
+        'senderId': authUser.uid,
+        'senderImage': userData.data()!['image_url'],
+        'sendername': userData.data()!['username'],
+      });
+
+      final newChatData = await FirebaseFirestore.instance
+          .collection('messages')
+          .doc(widget.groupId)
+          .collection('chats')
+          .doc(newChat.id)
+          .get();
+
+      /// 2. After new chat creation, update recentMessage in group collection
+      await FirebaseFirestore.instance
+          .collection('groups')
+          .doc(widget.groupId)
+          .update({
+        'recentMessage': {
+          'chatText': newChatData.data()!['text'],
+          'sentAt': newChatData.data()!['createdAt'],
+          'sendBy': newChatData.data()!['senderId'],
+          'chatId': newChatData.id,
+        }
+      });
+    } on FirebaseException catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(error.message ?? 'Authentication failed'),
+      ));
+
+      setState(() {
+        isSending = false;
+      });
+    }
+
+    ////////////////////////////////////
   }
 
   @override
@@ -68,12 +110,14 @@ class _NewMessageState extends State<NewMessage> {
               controller: _messageController,
             ),
           ),
-          IconButton(
-              onPressed: _onSubmit,
-              icon: Icon(
-                Icons.send,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              )),
+          isSending
+              ? const CircularProgressIndicator()
+              : IconButton(
+                  onPressed: _onSubmit,
+                  icon: Icon(
+                    Icons.send,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  )),
         ],
       ),
     );
