@@ -27,6 +27,7 @@ class _ChatMessagesState extends State<ChatMessages> {
             .collection('messages')
             .doc(widget.groupId)
             .collection('chats')
+            .orderBy('createdAt', descending: false)
             .snapshots(),
         builder: ((ctx, chatSnapshot) {
           if (chatSnapshot.connectionState == ConnectionState.waiting) {

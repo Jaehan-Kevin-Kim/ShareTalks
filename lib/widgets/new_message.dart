@@ -81,6 +81,9 @@ class _NewMessageState extends State<NewMessage> {
           'chatId': newChatData.id,
         }
       });
+      setState(() {
+        isSending = false;
+      });
     } on FirebaseException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

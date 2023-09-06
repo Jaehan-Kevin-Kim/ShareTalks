@@ -9,8 +9,8 @@ import 'package:share_talks/widgets/new_message.dart';
 final firebaseUtils = FirebaseUtils();
 
 class ChatScreen extends StatefulWidget {
-  final List<dynamic> usersUids;
-  const ChatScreen({super.key, required this.usersUids});
+  final List<String> otherUsersUid;
+  const ChatScreen({super.key, required this.otherUsersUid});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -28,21 +28,26 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
   }
 
-  Future<void> createGroup(List<dynamic> usersUids) async {
+  Future<void> createGroup(List<String> otherUsersUid) async {
     try {
       final createdGroup = await firebaseUtils.groupsCollection.add({
         'title': groupTitle,
-        'members': usersUids,
+        'members': [userUid, ...otherUsersUid],
         'createdAt': Timestamp.now(),
         'recentMessage': {},
-        'type': usersUids.length == 2
+        'type': otherUsersUid.length == 1
             ? 1
             : 2, // if other user's uid's length = 1 ? individual Chat : group Chat
       });
 
-      // 2-1-2-3. Add groupId into user's collection group field
-      for (final userUId in usersUids) {
-        await firebaseUtils.usersDoc(userUId).update({
+      // 2-1-2-2. Add group into user's collection group field
+      await firebaseUtils.usersDoc(userUid).update({
+        'group': FieldValue.arrayUnion([createdGroup.id])
+      });
+
+      // 2-1-2-3. Add group into opponent user's collection group field
+      for (final otherUserUId in otherUsersUid) {
+        await firebaseUtils.usersDoc(otherUserUId).update({
           'group': FieldValue.arrayUnion([createdGroup.id])
         });
       }
@@ -57,13 +62,13 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
 // For Individual Chat
-  Future<String> groupIdFuture(List<dynamic> usersUids) async {
+  Future<String> groupIdFuture(List<String> otherUsersUid) async {
     /// 1. If user's collection's group field is empty, then create a new group
     final usersData = await firebaseUtils.usersData(userUid);
 
     if (usersData!['group'].isEmpty) {
       // create a new group, and return with created a group id
-      await createGroup(usersUids);
+      await createGroup(otherUsersUid);
       return groupId;
     }
 
@@ -75,12 +80,12 @@ class _ChatScreenState extends State<ChatScreen> {
     //     return groupCollectionDocument.data()['members'].contains(userUid) &&
     //         groupCollectionDocument
     //             .data()['members']
-    //             .contains(usersUids[0]);
+    //             .contains(otherUsersUid[0]);
     //   }
 
-    //   if (groupCollectionDocument.data().length != usersUids.length + 1) {
+    //   if (groupCollectionDocument.data().length != otherUsersUid.length + 1) {
     //     groupCollectionDocuments.docs.where((groupCollectionDocument) {
-    //       return usersUids.every((userId) =>
+    //       return otherUsersUid.every((userId) =>
     //           groupCollectionDocument.data()['member'].contains(userId));
     //     });
     //   } else {
@@ -92,24 +97,19 @@ class _ChatScreenState extends State<ChatScreen> {
     final matchedGroup =
         groupCollectionDocuments.docs.where((groupCollectionDocument) {
       if (groupCollectionDocument.data()['type'] == 1) {
-        return groupCollectionDocument
+        return groupCollectionDocument.data()['members'].contains(userUid) &&
+            groupCollectionDocument
                 .data()['members']
-                .contains(usersUids[0]) &&
-            groupCollectionDocument.data()['members'].contains(usersUids[1]);
+                .contains(otherUsersUid[0]);
       } else {
-        if (usersUids.length ==
-            groupCollectionDocument.data()['members'].length) {
-          return usersUids.every((userId) =>
-              groupCollectionDocument.data()['members'].contains(userId));
-        } else {
-          return false;
-        }
+        return otherUsersUid.every((userId) =>
+            groupCollectionDocument.data()['members'].contains(userId));
       }
     }).toList();
 
     // matchedGroup =
     //     groupCollectionDocuments.docs.where((groupCollectionDocument) {
-    //   return usersUids.every((userId) =>
+    //   return otherUsersUid.every((userId) =>
     //       groupCollectionDocument.data()['member'].contains(userId));
     // }).toList();
 
@@ -119,7 +119,7 @@ class _ChatScreenState extends State<ChatScreen> {
       groupId = matchedGroup[0].id;
     } else {
       // 2-1-2. If failed to find a group containing both user, and opponent id, create a new group
-      await createGroup(usersUids);
+      await createGroup(otherUsersUid);
     }
     return groupId;
   }
@@ -144,7 +144,7 @@ class _ChatScreenState extends State<ChatScreen> {
           //   child: Text("Logged In!"),
           // ),
           FutureBuilder(
-        future: groupIdFuture(widget.usersUids),
+        future: groupIdFuture(widget.otherUsersUid),
         builder: ((context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
