@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_talks/screens/auth.dart';
 import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/screens/chat_list.dart';
+import 'package:share_talks/screens/navigator.dart';
 import 'package:share_talks/widgets/firebase_options.dart';
 
 void main() async {
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
           // }
           if (snapshot.hasData) {
             // return const ChatScreen();
-            return const ChatListScreen();
+            return const NavigatorScreen();
           } else {
             return const AuthScreen();
           }

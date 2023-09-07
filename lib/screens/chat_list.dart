@@ -37,7 +37,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select friend'),
+        title: Text('Chats'),
         actions: [
           IconButton(
               onPressed: () {
@@ -72,17 +72,23 @@ class _ChatListScreenState extends State<ChatListScreen> {
               child: const Text('send a message'));
         }),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-          onTap: _selectPage,
-          currentIndex: _selectedPageIndex,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.chat_bubble_outline), label: ''),
-          ]),
+      // bottomNavigationBar: BottomNavigationBar(
+      //     onTap: _selectPage,
+      //     currentIndex: _selectedPageIndex,
+      //     items: const [
+      //       BottomNavigationBarItem(
+      //         // type
+      //         // showSelectedLabels: false,
+
+      //         icon: Icon(
+      //           Icons.person_outline,
+      //           size: 25,
+      //         ),
+      //         label: '',
+      //       ),
+      //       BottomNavigationBarItem(
+      //           icon: Icon(Icons.chat_bubble_outline), label: ''),
+      //     ]),
     );
     // Center(
     //   child: ElevatedButton(
