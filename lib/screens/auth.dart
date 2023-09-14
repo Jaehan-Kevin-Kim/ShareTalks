@@ -68,6 +68,7 @@ class _AuthScreenState extends State<AuthScreen> {
               .collection('users')
               .doc(userCredential.user!.uid)
               .set({
+            'id': userCredential.user!.uid,
             'username': _enteredUsername,
             'email': _enteredEmail,
             'image_url': imageUrl,
@@ -98,13 +99,20 @@ class _AuthScreenState extends State<AuthScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
 
             children: [
-              // Container(
-              //   margin: const EdgeInsets.only(
-              //       top: 30, bottom: 20, left: 20, right: 20),
-              //   width: 200,
-              //   alignment: Alignment.center,
-              //   child: Image.asset('assets/images/'),
-              // ),
+              Container(
+                margin: const EdgeInsets.only(
+                    top: 30, bottom: 20, left: 20, right: 20),
+                width: 200,
+                alignment: Alignment.center,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset('assets/images/logo.png'),
+                ),
+                // decoration:
+
+                //     BoxDecoration(borderRadius: BorderRadius.circular(200)),
+                // child: Image.asset('assets/images/logo.png'),
+              ),
               Card(
                 margin: const EdgeInsets.all(20),
                 color: Colors.white,

@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:share_talks/screens/chat.dart';
+import 'package:share_talks/widgets/message_bubble.dart';
 
 final fBF = FirebaseFirestore.instance;
 
@@ -22,43 +24,79 @@ class _ChatMessagesState extends State<ChatMessages> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        // stream: FirebaseFirestore.instance.collection('chat').snapshots(),
-        stream: FirebaseFirestore.instance
-            .collection('messages')
-            .doc(widget.groupId)
-            .collection('chats')
-            .orderBy('createdAt', descending: false)
-            .snapshots(),
-        builder: ((ctx, chatSnapshot) {
-          if (chatSnapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }
+      // stream: FirebaseFirestore.instance.collection('chat').snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('messages')
+          .doc(widget.groupId)
+          .collection('chats')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: ((ctx, chatSnapshot) {
+        if (chatSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
 
-          if (!chatSnapshot.hasData || chatSnapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text("No messages yet"),
-            );
-          }
+        if (!chatSnapshot.hasData || chatSnapshot.data!.docs.isEmpty) {
+          return const Center(
+            child: Text("No messages yet"),
+          );
+        }
 
-          if (chatSnapshot.hasError) {
-            return const Center(
-              child: Text("Something went wrong"),
-            );
-          }
+        if (chatSnapshot.hasError) {
+          return const Center(
+            child: Text("Something went wrong"),
+          );
+        }
 
-          final loadedMessage = chatSnapshot.data!.docs;
+        final loadedMessage = chatSnapshot.data!.docs;
 
-          return ListView.builder(
-              itemCount: loadedMessage.length,
-              itemBuilder: ((context, index) {
-                return Column(
-                  children: [
-                    Text('${loadedMessage[index]['senderName']}: '),
-                    Text(loadedMessage[index]['text']),
-                    Text('groupid: ${widget.groupId}')
-                  ],
-                );
-              }));
-        }));
+        return ListView.builder(
+          padding: const EdgeInsets.only(
+            bottom: 40,
+            left: 13,
+            right: 13,
+          ),
+          reverse: true,
+          itemCount: loadedMessage.length,
+          itemBuilder: (ctx, index) {
+            final chatMessage = loadedMessage[index].data();
+            // Text(loadedMessage[index].data()['text']));
+            final nextChatMessage = index + 1 < loadedMessage.length
+                ? loadedMessage[index + 1].data()
+                : null;
+
+            final currentMessageUserId = chatMessage['senderId'];
+            final nextMessageUserId =
+                nextChatMessage != null ? nextChatMessage['senderId'] : null;
+            final nextUserIsSame = nextMessageUserId == currentMessageUserId;
+
+            if (nextUserIsSame) {
+              return MessageBubble.next(
+                  message: chatMessage['text'],
+                  isMe: firebaseUtils.currentUserUid == currentMessageUserId);
+            } else {
+              return MessageBubble.first(
+                message: chatMessage['text'],
+                isMe: firebaseUtils.currentUserUid == currentMessageUserId,
+                userImage: chatMessage['senderImage'],
+                username: chatMessage['senderName'],
+              );
+            }
+          },
+
+          // itemBuilder: ((context, index) {
+          //   return Column(
+          //     children: [
+          //       Text('${loadedMessage[index]['senderName']}: '),
+          //       Text(loadedMessage[index]['text']),
+          //       Text('groupid: ${widget.groupId}')
+          //     ],
+          //   );
+          // }),
+        );
+      }),
+    );
   }
 }

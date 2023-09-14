@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 import 'package:share_talks/widgets/member_item.dart';
@@ -17,12 +18,23 @@ class _MembersScreenState extends State<MembersScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Members'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+            },
+            icon: const Icon(Icons.exit_to_app),
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          )
+        ],
       ),
       body: FutureBuilder(
         future: firebaseUtils.usersCollection.get(),
         builder: ((context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
           if (!snapshot.hasData) {
             return const Center(
@@ -32,13 +44,9 @@ class _MembersScreenState extends State<MembersScreen> {
             return ListView.builder(
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (ctx, index) =>
-                    // const ListTile(title: Text(),)
-
                     MemberItem(userData: snapshot.data!.docs[index]));
-            // MemberItem(userData: snapshot.data!.docs[index].data()));
-            // snapshot.data!.docs;
-            // return Text("Data");
           }
+          // return const Center(child: CircularProgressIndicator());
         }),
       ),
     );

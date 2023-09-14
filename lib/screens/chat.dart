@@ -10,7 +10,8 @@ final firebaseUtils = FirebaseUtils();
 
 class ChatScreen extends StatefulWidget {
   final List<dynamic> usersUids;
-  const ChatScreen({super.key, required this.usersUids});
+  String? groupTitle;
+  ChatScreen({super.key, required this.usersUids, this.groupTitle});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -21,11 +22,13 @@ class _ChatScreenState extends State<ChatScreen> {
   // var userDoc;
   String groupId = '';
   String? groupTitle;
+  String opponentUserName = "";
 
   @override
   void initState() {
-    userUid = firebaseUtils.currentUserUid;
     super.initState();
+    userUid = firebaseUtils.currentUserUid;
+    groupTitle = widget.groupTitle;
   }
 
   Future<void> createGroup(List<dynamic> usersUids) async {
@@ -121,6 +124,23 @@ class _ChatScreenState extends State<ChatScreen> {
       // 2-1-2. If failed to find a group containing both user, and opponent id, create a new group
       await createGroup(usersUids);
     }
+    // final groupData = await firebaseUtils.groupsData(groupId);
+    // // if (groupData!['type'] == 1) {
+    // //   final opponentUserId = groupData['members']
+    // //       .first((member) => member != firebaseUtils.currentUserUid);
+    // //   final userData = await firebaseUtils.usersData(opponentUserId);
+    // //   opponentUserName = userData!['userName'];
+    // // } else {
+    // //   setState(() {
+    // //     groupTitle = groupData['title'];
+    // //   });
+    // // }
+
+    // if (groupData!['type'] == 2) {
+    //   //   setState(() {
+    //   groupTitle = groupData['title'];
+    //   //   });
+    // }
     return groupId;
   }
 
@@ -128,7 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter Chat'),
+        title: Text(groupTitle ?? 'Chat Room'),
         actions: [
           IconButton(
             onPressed: () {
@@ -147,7 +167,9 @@ class _ChatScreenState extends State<ChatScreen> {
         future: groupIdFuture(widget.usersUids),
         builder: ((context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
 
           if (snapshot.hasError) {
@@ -167,7 +189,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
             );
           } else {
-            return Text('something wrong');
+            return const Text('something wrong');
           }
         }),
       ),

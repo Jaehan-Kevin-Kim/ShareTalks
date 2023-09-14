@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
@@ -39,9 +40,12 @@ class _ChatListItemState extends State<ChatListItem> {
     // getGroupData();
   }
 
-  void _onTapChatList(var groupData) {
+  void _onTapChatList(Map<String, dynamic> groupData) async {
     Navigator.of(context).push(MaterialPageRoute(
-        builder: (ctx) => ChatScreen(usersUids: groupData!['members'])));
+        builder: (ctx) => ChatScreen(
+              usersUids: groupData['members'],
+              groupTitle: groupData['title'] ?? oppositeUserData!['username'],
+            )));
   }
 
   @override
@@ -50,7 +54,7 @@ class _ChatListItemState extends State<ChatListItem> {
       future: getGroupData(),
       builder: ((context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return const Center(child: LinearProgressIndicator());
         }
         if (snapshot.hasData && snapshot.data!.entries.isNotEmpty) {
           final groupData = snapshot.data!;
@@ -61,17 +65,18 @@ class _ChatListItemState extends State<ChatListItem> {
             },
             leading: CircleAvatar(
                 child: Text(groupData['members'].length == 2
-                    ? 'I'
-                    : groupData['members'].length)),
-            title:
-                Text(groupData['groupTitle'] ?? oppositeUserData!['username']),
+                    ? "I"
+                    : groupData['members'].length.toString())),
+            title: Text(groupData['title'] ?? oppositeUserData!['username']),
             subtitle: Text(
               groupData['recentMessage']['chatText'],
               overflow: TextOverflow.ellipsis,
             ),
           );
         } else {
-          return Text("No Chat List Yet...");
+          return const Center(
+            child: Text("No Chat List Yet..."),
+          );
         }
       }),
     );
