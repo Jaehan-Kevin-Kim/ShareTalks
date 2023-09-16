@@ -41,10 +41,40 @@ class _MembersScreenState extends State<MembersScreen> {
               child: Text("No Members"),
             );
           } else {
+            final usersDataWithoutMe = snapshot.data!.docs
+                .where((doc) => doc.id != firebaseUtils.currentUserUid)
+                .toList();
+            // final myData = snapshot.data!.docs
+            //     .firstWhere((doc) => doc.id == firebaseUtils.currentUserUid);
+
             return ListView.builder(
-                itemCount: snapshot.data!.docs.length,
-                itemBuilder: (ctx, index) =>
-                    MemberItem(userData: snapshot.data!.docs[index]));
+                itemCount: usersDataWithoutMe.length,
+                itemBuilder: (ctx, index) {
+                  // if (snapshot.data!.docs[index].id ==
+                  //     firebaseUtils.currentUserUid) {
+                  //   continue;
+                  // }
+
+                  return MemberItem(userData: usersDataWithoutMe[index]);
+                });
+            // return Column(
+            //   children: [
+            //     MemberItem(userData: myData),
+            //     const Divider(),
+            //     Expanded(
+            //       child: ListView.builder(
+            //           itemCount: usersDataWithoutMe.length,
+            //           itemBuilder: (ctx, index) {
+            //             // if (snapshot.data!.docs[index].id ==
+            //             //     firebaseUtils.currentUserUid) {
+            //             //   continue;
+            //             // }
+
+            //             return MemberItem(userData: usersDataWithoutMe[index]);
+            //           }),
+            //     )
+            //   ],
+            // );
           }
           // return const Center(child: CircularProgressIndicator());
         }),

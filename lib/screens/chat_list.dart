@@ -78,6 +78,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
               ),
             );
           }
+          // Need to comment out the below code.
           return ElevatedButton(
               onPressed: () {
                 _onClickSendMessage(['u4By9gLX5dgvOhuEELhzwCg07Iq2']);

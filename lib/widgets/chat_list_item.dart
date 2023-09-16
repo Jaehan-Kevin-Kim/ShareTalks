@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 
 final firebaseUtils = FirebaseUtils();
+// final formatter = DateFormat.yMd();
+final formatter = DateFormat.Hm();
 
 class ChatListItem extends StatefulWidget {
   final String groupId;
@@ -16,6 +19,27 @@ class ChatListItem extends StatefulWidget {
 class _ChatListItemState extends State<ChatListItem> {
   // Map<String, dynamic>? groupData;
   Map<String, dynamic>? oppositeUserData;
+
+  // Future<Map<String, dynamic>> getGroupData() async {
+  //   final groupSnapshot = firebaseUtils.groupsDoc(widget.groupId).snapshots();
+
+  //   final groupData = await firebaseUtils.groupsData(widget.groupId);
+
+  //   if (groupData == null) {
+  //     return {};
+  //   }
+  //   if (groupSnapshot.isEmpty == null) {
+  //     return {};
+  //   }
+
+  //   if (groupData['title'] == null) {
+  //     final oppositeUserUid = groupData['members']
+  //         .firstWhere((member) => member != firebaseUtils.currentUserUid);
+  //     oppositeUserData = await firebaseUtils.usersData(oppositeUserUid);
+  //   }
+
+  //   return groupData;
+  // }
 
   Future<Map<String, dynamic>> getGroupData() async {
     final groupData = await firebaseUtils.groupsData(widget.groupId);
@@ -40,12 +64,15 @@ class _ChatListItemState extends State<ChatListItem> {
     // getGroupData();
   }
 
-  void _onTapChatList(Map<String, dynamic> groupData) async {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (ctx) => ChatScreen(
-              usersUids: groupData['members'],
-              groupTitle: groupData['title'] ?? oppositeUserData!['username'],
-            )));
+  void _onTapChatList(Map<String, dynamic> groupData) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(
+            builder: (ctx) => ChatScreen(
+                  usersUids: groupData['members'],
+                  groupTitle:
+                      groupData['title'] ?? oppositeUserData!['username'],
+                )))
+        .then((value) => setState(() {}));
   }
 
   @override
@@ -59,14 +86,25 @@ class _ChatListItemState extends State<ChatListItem> {
         if (snapshot.hasData && snapshot.data!.entries.isNotEmpty) {
           final groupData = snapshot.data!;
 
+          final lastSentMessageDateTime =
+              groupData['recentMessage']['sentAt'].toDate();
+
           return ListTile(
             onTap: () {
               _onTapChatList(groupData);
             },
+            trailing: Text(DateFormat.Md().format(lastSentMessageDateTime) ==
+                    DateFormat.Md().format(DateTime.now())
+                ? DateFormat.jm().format(lastSentMessageDateTime)
+                : DateFormat.Md().format(lastSentMessageDateTime)),
             leading: CircleAvatar(
-                child: Text(groupData['members'].length == 2
+              child: Text(
+                groupData['members'].length == 2
                     ? "I"
-                    : groupData['members'].length.toString())),
+                    // ? oppositeUserData!['image_url']
+                    : groupData['members'].length.toString(),
+              ),
+            ),
             title: Text(groupData['title'] ?? oppositeUserData!['username']),
             subtitle: Text(
               groupData['recentMessage']['chatText'],

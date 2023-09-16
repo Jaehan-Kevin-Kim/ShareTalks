@@ -14,7 +14,6 @@ class MemberItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void _onClickMember(context) {
-      final userDatacz = userData.data();
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (ctx) => ChatScreen(
