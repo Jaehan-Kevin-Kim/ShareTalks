@@ -87,16 +87,17 @@ class _ChatListItemState extends State<ChatListItem> {
           final groupData = snapshot.data!;
 
           final lastSentMessageDateTime =
-              groupData['recentMessage']['sentAt'].toDate();
+              groupData['recentMessage']?['sentAt']?.toDate();
 
           return ListTile(
             onTap: () {
               _onTapChatList(groupData);
             },
-            trailing: Text(DateFormat.Md().format(lastSentMessageDateTime) ==
-                    DateFormat.Md().format(DateTime.now())
-                ? DateFormat.jm().format(lastSentMessageDateTime)
-                : DateFormat.Md().format(lastSentMessageDateTime)),
+
+            // trailing: Text(DateFormat.Md().format(lastSentMessageDateTime) ==
+            //         DateFormat.Md().format(DateTime.now())
+            //     ? DateFormat.jm().format(lastSentMessageDateTime)
+            //     : DateFormat.Md().format(lastSentMessageDateTime)),
             leading: CircleAvatar(
               child: Text(
                 groupData['members'].length == 2

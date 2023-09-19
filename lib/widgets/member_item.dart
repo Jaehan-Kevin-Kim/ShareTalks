@@ -13,7 +13,7 @@ class MemberItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void _onClickMember(context) {
+    void onClickMember(context) {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (ctx) => ChatScreen(
@@ -26,7 +26,7 @@ class MemberItem extends StatelessWidget {
 
     return ListTile(
       onTap: () {
-        _onClickMember(context);
+        onClickMember(context);
       },
       leading: CircleAvatar(
         foregroundImage: NetworkImage(userData.data()['image_url']),

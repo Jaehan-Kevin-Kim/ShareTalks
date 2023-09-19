@@ -164,7 +164,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             TextFormField(
                               decoration:
-                                  const InputDecoration(labelText: 'Pasword'),
+                                  const InputDecoration(labelText: 'Password'),
                               obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 6) {
