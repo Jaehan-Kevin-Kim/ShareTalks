@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
+import 'package:share_talks/widgets/camera_options.dart';
 import 'package:share_talks/widgets/create_chat_group_item.dart';
+import 'package:share_talks/widgets/user_image_picker.dart';
 
 final firebaseUtils = FirebaseUtils();
 
@@ -14,6 +19,7 @@ class CreateChatGroupScreen extends StatefulWidget {
 }
 
 class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
+  File? _selectedImage;
   final _chatGroupNameController = TextEditingController();
   List<String> groupMemberIds = [];
   late Future<List<Map<String, dynamic>>> _loadedItems;
@@ -91,6 +97,28 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
             )));
   }
 
+  void _getImage(bool isCameraSelected) async {
+    final imagePicker = ImagePicker();
+    final pickedImage = isCameraSelected
+        ? await imagePicker.pickImage(
+            source: ImageSource.camera, imageQuality: 50, maxWidth: 200
+            // source: ImageSource.camera, imageQuality: 50, maxWidth: 200
+            )
+        : await imagePicker.pickImage(
+            source: ImageSource.gallery, imageQuality: 50, maxWidth: 200);
+
+    if (pickedImage == null) {
+      return;
+    }
+
+    setState(
+      () {
+        _selectedImage = File(pickedImage.path);
+      },
+    );
+    // onSelectedImage(_selectedImage!);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,6 +141,41 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
             // child:
             Row(
               children: [
+                // const SizedBox(
+                //   width: 60,
+                // ),
+                // UserImagePicker(onSelectedImage: (image) {
+                //   _selectedImage = image;
+                // }),
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return CameraOptions(onSelectCameraOption: _getImage);
+                        });
+                  },
+                  child: CircleAvatar(
+                    backgroundColor: Colors.black54,
+                    radius: 28,
+                    child: CircleAvatar(
+                      backgroundColor: Colors.white,
+                      // AssetImage('assets/images/group_default_image.png'),
+                      backgroundImage: _selectedImage == null
+                          ? const AssetImage(
+                              'assets/images/group_default_image.png')
+                          : FileImage(_selectedImage!) as ImageProvider,
+                      // foregroundImage: _selectedImage == null
+                      //     ? AssetImage('assets/images/group_default_image.png')
+                      //     : FileImage(_selectedImage!),
+                      // foregroundImage:
+                      //     AssetImage('assets/images/group_default_image.png'),
+
+                      radius: 27,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: TextFormField(
                     decoration:
@@ -122,12 +185,13 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
                   ),
                 ),
                 const SizedBox(
-                  width: 60,
+                  width: 30,
                 ),
                 // Spacer(),
                 Text('${groupMemberIds.length} Selected'),
               ],
             ),
+            const SizedBox(height: 16),
 
             FutureBuilder(
               future: _loadedItems,

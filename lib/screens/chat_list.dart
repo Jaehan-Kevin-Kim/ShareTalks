@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/screens/create_chat_group.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 import 'package:share_talks/widgets/chat_list_item.dart';
@@ -18,20 +17,6 @@ class ChatListScreen extends StatefulWidget {
 class _ChatListScreenState extends State<ChatListScreen> {
   String groupId = '';
   String? groupTitle;
-  int _selectedPageIndex = 0;
-
-  void _selectPage(int index) {
-    setState(() {
-      _selectedPageIndex = index;
-    });
-  }
-
-  void _onClickSendMessage(List<String> usersUids) {
-    // await getGroupId(opponentUid);
-    // print('next');
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => ChatScreen(usersUids: usersUids)));
-  }
 
   void _createChatGroup() {
     Navigator.of(context).push(
@@ -58,6 +43,31 @@ class _ChatListScreenState extends State<ChatListScreen> {
         ],
       ),
       body: FutureBuilder(
+        future: firebaseUtils.usersData(firebaseUtils.currentUserUid),
+        builder: ((context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasData && snapshot.data!['group'].isNotEmpty) {
+            final groups = snapshot.data!['group'];
+            print(groups);
+            // print(snapshot.data!.data()!['group']);
+            return ListView.builder(
+              itemCount: groups.length,
+              itemBuilder: (ctx, index) => ChatListItem(
+                groupId: groups[index],
+              ),
+            );
+          } else {
+            return const Center(
+              child: Text("No Chat History Yet"),
+            );
+          }
+        }),
+      ),
+      /*
+      body: FutureBuilder(
         future: FirebaseFirestore.instance
             .collection('users')
             .doc(firebaseUtils.currentUserUid)
@@ -67,7 +77,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasData) {
+          if (snapshot.hasData && snapshot.data()!) {
             final groups = snapshot.data!.data()!['group'];
             print(groups);
             // print(snapshot.data!.data()!['group']);
@@ -77,39 +87,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 groupId: groups[index],
               ),
             );
+          } else {
+            return const Center(
+              child: Text("No Chat History Yet"),
+            );
           }
-          // Need to comment out the below code.
-          return ElevatedButton(
-              onPressed: () {
-                _onClickSendMessage(['u4By9gLX5dgvOhuEELhzwCg07Iq2']);
-              },
-              child: const Text('send a message'));
         }),
       ),
-      // bottomNavigationBar: BottomNavigationBar(
-      //     onTap: _selectPage,
-      //     currentIndex: _selectedPageIndex,
-      //     items: const [
-      //       BottomNavigationBarItem(
-      //         // type
-      //         // showSelectedLabels: false,
-
-      //         icon: Icon(
-      //           Icons.person_outline,
-      //           size: 25,
-      //         ),
-      //         label: '',
-      //       ),
-      //       BottomNavigationBarItem(
-      //           icon: Icon(Icons.chat_bubble_outline), label: ''),
-      //     ]),
+      */
     );
-    // Center(
-    //   child: ElevatedButton(
-    //       onPressed: () {
-    //         _onClickSendMessage(['u4By9gLX5dgvOhuEELhzwCg07Iq2']);
-    //       },
-    //       child: const Text('send a message')),
-    // );
   }
 }
