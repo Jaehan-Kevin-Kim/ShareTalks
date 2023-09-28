@@ -5,8 +5,14 @@ import 'package:flutter/material.dart';
 final fBF = FirebaseFirestore.instance; //
 
 class NewMessage extends StatefulWidget {
-  final String groupId;
-  const NewMessage({super.key, required this.groupId});
+  // final String groupId;
+  final Map<String, dynamic> groupData;
+
+  const NewMessage({
+    super.key,
+    // required this.groupId,
+    required this.groupData,
+  });
 
   @override
   State<NewMessage> createState() => _NewMessageState();
@@ -52,7 +58,7 @@ class _NewMessageState extends State<NewMessage> {
       // 1. Create a message by using groupId
       final newChat = await FirebaseFirestore.instance
           .collection('messages')
-          .doc(widget.groupId)
+          .doc(widget.groupData['id'])
           .collection('chats')
           .add({
         'createdAt': Timestamp.now(),
@@ -64,7 +70,7 @@ class _NewMessageState extends State<NewMessage> {
 
       final newChatData = await FirebaseFirestore.instance
           .collection('messages')
-          .doc(widget.groupId)
+          .doc(widget.groupData['id'])
           .collection('chats')
           .doc(newChat.id)
           .get();
@@ -72,7 +78,7 @@ class _NewMessageState extends State<NewMessage> {
       /// 2. After new chat creation, update recentMessage in group collection
       await FirebaseFirestore.instance
           .collection('groups')
-          .doc(widget.groupId)
+          .doc(widget.groupData['id'])
           .update({
         'recentMessage': {
           'chatText': newChatData.data()!['text'],

@@ -38,9 +38,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
       try {
         if (_isLoginMode) {
-          final userCredentails =
-              await _firebaseAuth.signInWithEmailAndPassword(
-                  email: _enteredEmail, password: _enteredPassword);
+          // final userCredentails =
+          await _firebaseAuth.signInWithEmailAndPassword(
+              email: _enteredEmail, password: _enteredPassword);
         } else {
           if (_selectedImage == null) {
             ScaffoldMessenger.of(context).clearSnackBars();

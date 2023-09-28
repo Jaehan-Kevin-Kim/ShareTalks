@@ -9,14 +9,23 @@ final fBF = FirebaseFirestore.instance;
 final firebaseUtils = FirebaseUtils();
 
 class NavigatorScreen extends StatefulWidget {
-  const NavigatorScreen({Key? key}) : super(key: key);
+  final int selectedPageIndex;
+  const NavigatorScreen({Key? key, this.selectedPageIndex = 0})
+      : super(key: key);
 
   @override
   State<NavigatorScreen> createState() => _NavigatorScreenState();
 }
 
 class _NavigatorScreenState extends State<NavigatorScreen> {
-  int _selectedPageIndex = 0;
+  late int _selectedPageIndex;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _selectedPageIndex = widget.selectedPageIndex;
+  }
 
   void _selectPage(int index) {
     setState(() {
@@ -33,9 +42,10 @@ class _NavigatorScreenState extends State<NavigatorScreen> {
 
     return Scaffold(
       // body: activePage,
-      body: _selectedPageIndex == 1
-          ? const ChatListScreen()
-          : const MembersScreen(),
+      body: activePage,
+      // _selectedPageIndex == 1
+      //     ? const ChatListScreen()
+      //     : const MembersScreen(),
       bottomNavigationBar: BottomNavigationBar(
           onTap: _selectPage,
           currentIndex: _selectedPageIndex,

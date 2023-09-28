@@ -1,27 +1,32 @@
-import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
+import 'package:share_talks/utilities/util.dart';
 import 'package:share_talks/widgets/camera_options.dart';
 import 'package:share_talks/widgets/create_chat_group_item.dart';
-import 'package:share_talks/widgets/user_image_picker.dart';
+import 'dart:io';
+
+import 'package:uuid/uuid.dart';
 
 final firebaseUtils = FirebaseUtils();
+final utils = Util();
+const uuid = Uuid();
 
 class CreateChatGroupScreen extends StatefulWidget {
   const CreateChatGroupScreen({Key? key}) : super(key: key);
 
   @override
-  _CreateChatGroupScreenState createState() => _CreateChatGroupScreenState();
+  State<CreateChatGroupScreen> createState() => _CreateChatGroupScreenState();
 }
 
 class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
+  // late final utils = Util(context: context);
+  late String groupId;
   File? _selectedImage;
   final _chatGroupNameController = TextEditingController();
-  List<String> groupMemberIds = [];
+  List<String> groupMemberIds = [firebaseUtils.currentUserUid];
   late Future<List<Map<String, dynamic>>> _loadedItems;
 
   @override
@@ -72,7 +77,7 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
     });
   }
 
-  _onClickCreateGroup() {
+  _onClickCreateGroup() async {
     if (groupMemberIds.length < 2) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -88,12 +93,72 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
       return;
     }
 
+    try {
+      // 먼저 group chat을 생성 하기 //
+      // 1. findUserContainedGroupChatGroup을 실행 해서, matched group이 있는지 확인
+      final matchedGroup =
+          await utils.findUserContainedGroupChatGroup(groupMemberIds);
+
+      // 1-1. if matched group is not null, then return error message with snackbar
+      if (matchedGroup != null) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Group is already exist with this memebers'),
+          ),
+        );
+        return;
+      }
+
+      // 1-2. else, return creating groupchat
+
+      // 여기서 selectedImage를 firestore에 저장하는 logic 작성 //
+      final newId = uuid.v4();
+      // _selectedImage = _selectedImage;
+      // File image = await File('assets/images/group_default_image.png').create();
+
+      // _selectedImage.isAbsolute = true;
+      String? imageUrl;
+      if (_selectedImage != null) {
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('group_images')
+            .child('$newId.jpg');
+
+        await storageRef.putFile(_selectedImage!);
+        imageUrl = await storageRef.getDownloadURL();
+      }
+
+      // Create a group chat group
+      final newGroupData = await utils.createGroupChatGroup(groupMemberIds,
+          _chatGroupNameController.text.trim(), imageUrl, newId);
+
+      // if (_selectedImage != null) {}
+
+      ///
+      ///
+      ///
+
+      sendToChatScreen(newGroupData);
+    } on FirebaseException catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(error.message ?? 'Somethings wrong...'),
+      ));
+    }
+  }
+
+  void sendToChatScreen(Map<String, dynamic> groupData) {
     Navigator.of(context).pop();
+
+    //이렇게 하고 chat에서는 그냥 groupId만 받으면 됨, 그러면 chat에서 나머지는 알아서 futureBuilder등으로 해당 data를 받아서 표시하면 되기 때문.
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => ChatScreen(
-              groupTitle: _chatGroupNameController.text.trim(),
-              usersUids: [...groupMemberIds, firebaseUtils.currentUserUid],
+              // groupTitle: _chatGroupNameController.text.trim(),
+              // groupId: groupId,
+              groupData: groupData,
+              groupTitle: groupData['title'],
             )));
   }
 
@@ -108,6 +173,7 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
             source: ImageSource.gallery, imageQuality: 50, maxWidth: 200);
 
     if (pickedImage == null) {
+      _selectedImage = File('assets/images/group_default_image.png');
       return;
     }
 
@@ -149,6 +215,7 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
                 // }),
                 GestureDetector(
                   onTap: () {
+                    print('click');
                     showModalBottomSheet(
                         context: context,
                         builder: (BuildContext context) {
@@ -188,7 +255,7 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
                   width: 30,
                 ),
                 // Spacer(),
-                Text('${groupMemberIds.length} Selected'),
+                Text('${groupMemberIds.length - 1} Selected'),
               ],
             ),
             const SizedBox(height: 16),

@@ -28,7 +28,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chats'),
+        automaticallyImplyLeading: false,
+        title: const Text('Chats'),
         actions: [
           IconButton(
               onPressed: _createChatGroup,
