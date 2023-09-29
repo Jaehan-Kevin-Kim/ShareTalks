@@ -1,25 +1,32 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+final formatter = DateFormat.jm();
 
 class MessageBubble extends StatelessWidget {
-  const MessageBubble.first({
-    super.key,
-    required this.userImage,
-    required this.username,
-    required this.message,
-    required this.isMe,
-  }) : isFirstInSequence = true;
+  const MessageBubble.first(
+      {super.key,
+      required this.userImage,
+      required this.username,
+      required this.message,
+      required this.isMe,
+      required this.createdAt})
+      : isFirstInSequence = true;
 
-  const MessageBubble.next({
-    super.key,
-    required this.message,
-    required this.isMe,
-  })  : isFirstInSequence = false,
+  const MessageBubble.next(
+      {super.key,
+      required this.message,
+      required this.isMe,
+      required this.createdAt})
+      : isFirstInSequence = false,
         userImage = null,
         username = null;
 
   final bool isFirstInSequence;
 
   final String? userImage;
+  final Timestamp createdAt;
 
   final String? username;
   final String message;
@@ -29,6 +36,17 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    Widget dateFormatWidget = Column(
+      children: [
+        Text(
+          formatter.format(createdAt.toDate()),
+          style: const TextStyle(fontSize: 10),
+        ),
+        const SizedBox(
+          height: 5,
+        )
+      ],
+    );
 
     return Stack(
       children: [
@@ -49,7 +67,9 @@ class MessageBubble extends StatelessWidget {
           child: Row(
             mainAxisAlignment:
                 isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              if (isMe) dateFormatWidget,
               Column(
                 crossAxisAlignment:
                     isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -110,6 +130,7 @@ class MessageBubble extends StatelessWidget {
                   ),
                 ],
               ),
+              if (!isMe) dateFormatWidget,
             ],
           ),
         ),

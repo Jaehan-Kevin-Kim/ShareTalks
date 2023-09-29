@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:share_talks/screens/create_chat_group.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
@@ -22,6 +23,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (ctx) => const CreateChatGroupScreen()),
     );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
   }
 
   @override

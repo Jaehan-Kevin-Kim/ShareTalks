@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:share_talks/screens/chat_list.dart';
 import 'package:share_talks/screens/navigator.dart';
@@ -36,80 +37,25 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     userUid = firebaseUtils.currentUserUid;
     // groupTitle = widget.groupTitle;
+    setupPushNotification();
   }
 
-//   Future<void> createGroup(List<dynamic> usersUids) async {
-//     await Util(context: context).createGroup(usersUids, widget.groupTitle);
+  void setupPushNotification() async {
+    final fcm = FirebaseMessaging.instance;
+    final notificationSettings = await fcm.requestPermission();
 
-//     try {
-//       final createdGroup = await firebaseUtils.groupsCollection.add({
-//         'title': widget.groupTitle,
-//         'members': usersUids,
-//         'createdAt': Timestamp.now(),
-//         'recentMessage': {},
-//         'type': usersUids.length == 2
-//             ? 1
-//             : 2, // if other user's uid's length = 1 ? individual Chat : group Chat
-//       });
-
-//       // 2-1-2-3. Add groupId into user's collection group field
-//       for (final userUId in usersUids) {
-//         await firebaseUtils.usersDoc(userUId).update({
-//           'group': FieldValue.arrayUnion([createdGroup.id])
-//         });
-//       }
-//       groupId = createdGroup.id;
-//     } on FirebaseException catch (error) {
-//       ScaffoldMessenger.of(context).clearSnackBars();
-//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-//         content: Text(error.message ?? 'Authentication failed'),
-//       ));
-//       return;
-//     }
-//   }
-
-// // For Individual Chat
-//   Future<String> groupIdFuture(List<dynamic> usersUids) async {
-//     /// 1. If user's collection's group field is empty, then create a new group
-//     final usersData = await firebaseUtils.usersData(userUid);
-
-//     if (usersData!['group'].isEmpty) {
-//       // create a new group, and return with created a group id
-//       await createGroup(usersUids);
-//       return groupId;
-//     }
-
-//     // 2-1. Find a group containing both user, and opponent userids in groups collection
-//     final groupCollectionDocuments = await firebaseUtils.groupsCollection.get();
-//     final matchedGroup =
-//         groupCollectionDocuments.docs.where((groupCollectionDocument) {
-//       if (groupCollectionDocument.data()['type'] == 1) {
-//         return groupCollectionDocument
-//                 .data()['members']
-//                 .contains(usersUids[0]) &&
-//             groupCollectionDocument.data()['members'].contains(usersUids[1]);
-//       } else {
-//         if (usersUids.length ==
-//             groupCollectionDocument.data()['members'].length) {
-//           return usersUids.every((userId) =>
-//               groupCollectionDocument.data()['members'].contains(userId));
-//         } else {
-//           return false;
-//         }
-//       }
-//     }).toList();
-
-//     // 2-1-1. If the group is found, get exist group Id
-//     if (matchedGroup.isNotEmpty) {
-//       // final matchedGroupId = matchedGroup[0].id;
-//       groupId = matchedGroup[0].id;
-//     } else {
-//       // 2-1-2. If failed to find a group containing both user, and opponent id, create a new group
-//       await createGroup(usersUids);
-//     }
-
-//     return groupId;
-//   }
+    if (notificationSettings.authorizationStatus ==
+        AuthorizationStatus.authorized) {
+      print("User granted permission");
+    } else if (notificationSettings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
+      print('User granted provisional permission');
+    } else {
+      print('User declined or has not accepted permission');
+    }
+    final token = await fcm.getToken();
+    print(token);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,41 +113,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 groupData: widget.groupData,
               ),
             ],
-          )
-          // FutureBuilder(
-          //   // future: groupIdFuture(widget.usersUids),
-          //   future: Util(context: context)
-          //       .getGroupId(widget.usersUids, widget.groupTitle),
-          //   builder: ((context, snapshot) {
-          //     if (snapshot.connectionState == ConnectionState.waiting) {
-          //       return const Center(
-          //         child: CircularProgressIndicator(),
-          //       );
-          //     }
-
-          //     if (snapshot.hasError) {
-          //       return const Center(
-          //         child: Text("Something went wrong"),
-          //       );
-          //     }
-
-          //     if (snapshot.hasData) {
-          //       final groupId = snapshot.data;
-          //       return Column(
-          //         children: [
-          //           // Text(widget.groupId),
-          //           Expanded(child: ChatMessages(groupId: groupId!)),
-          //           NewMessage(
-          //             groupId: groupId,
-          //           ),
-          //         ],
-          //       );
-          //     } else {
-          //       return const Text('something wrong');
-          //     }
-          //   }),
-          // ),
-          ),
+          )),
     );
   }
 }

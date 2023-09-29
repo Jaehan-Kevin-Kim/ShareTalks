@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_talks/screens/auth.dart';
@@ -19,6 +20,12 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  // getUserToken() async {
+  //   FirebaseMessaging messaging = FirebaseMessaging.instance;
+  //   String? userToken = await messaging.getToken();
+  //   print(userToken);
+  // }
 
   // This widget is the root of your application.
   @override
@@ -41,6 +48,7 @@ class MyApp extends StatelessWidget {
           // }
           if (snapshot.hasData) {
             // return const ChatScreen();
+            // getUserToken();
             return const NavigatorScreen();
           } else {
             return const AuthScreen();

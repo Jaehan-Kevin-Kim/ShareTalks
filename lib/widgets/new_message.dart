@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:share_talks/screens/chat.dart';
 
 final fBF = FirebaseFirestore.instance; //
 
@@ -90,6 +92,7 @@ class _NewMessageState extends State<NewMessage> {
       setState(() {
         isSending = false;
       });
+      // sendNotficiation();
     } on FirebaseException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -103,6 +106,40 @@ class _NewMessageState extends State<NewMessage> {
 
     ////////////////////////////////////
   }
+
+  // Future<List<String>> userTokens(List<String> userUids) async {}
+
+  // Future<void> sendNotficiation() async {
+  //   List<String> tokens = [];
+  //   final groupData = await firebaseUtils.groupsData(widget.groupData['id']);
+  //   final memberIds = groupData!['members'];
+  //   // final tokens =
+  //   for (final memberId in memberIds) {
+  //     final tokenDoc = await FirebaseFirestore.instance
+  //         .collection('userTokens')
+  //         .doc(memberId)
+  //         .get();
+  //     final token = tokenDoc.data()!['token'];
+  //     tokens.add(token);
+  //   }
+
+  //   FirebaseFunctions functions =
+  //       FirebaseFunctions.instanceFor(region: 'us-central');
+
+  //   try {
+  //     final HttpsCallable callable =
+  //         functions.httpsCallable('sendNotification');
+  //     final response = await callable.call({
+  //       'tokens': tokens,
+  //       'title': 'New Message',
+  //       'body': _messageController.text,
+  //     });
+
+  //     print('Message sent: ${response.data}');
+  //   } catch (e) {
+  //     print('Error sending message: $e');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

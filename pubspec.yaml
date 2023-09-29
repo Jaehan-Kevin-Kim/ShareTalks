@@ -43,6 +43,8 @@ dependencies:
   getwidget: ^4.0.0
   intl: ^0.18.1
   uuid: ^4.0.0
+  firebase_messaging: ^14.6.8
+  cloud_functions: ^4.4.1
 
 dev_dependencies:
   flutter_test:

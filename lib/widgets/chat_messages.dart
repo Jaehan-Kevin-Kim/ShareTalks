@@ -74,10 +74,12 @@ class _ChatMessagesState extends State<ChatMessages> {
 
             if (nextUserIsSame) {
               return MessageBubble.next(
+                  createdAt: chatMessage['createdAt'],
                   message: chatMessage['text'],
                   isMe: firebaseUtils.currentUserUid == currentMessageUserId);
             } else {
               return MessageBubble.first(
+                createdAt: chatMessage['createdAt'],
                 message: chatMessage['text'],
                 isMe: firebaseUtils.currentUserUid == currentMessageUserId,
                 userImage: chatMessage['senderImage'],
