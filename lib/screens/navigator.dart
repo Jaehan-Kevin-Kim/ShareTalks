@@ -32,9 +32,6 @@ class _NavigatorScreenState extends State<NavigatorScreen> {
     super.initState();
     _selectedPageIndex = widget.selectedPageIndex;
     setupPushNotification();
-    // NotificationService().initNotification();
-    // loadFCM();
-    // listenFCM();
   }
 
   void _selectPage(int index) {
@@ -45,26 +42,6 @@ class _NavigatorScreenState extends State<NavigatorScreen> {
 
   void setupPushNotification() async {
     await FirebaseNotificationService().initNotification();
-    // final fcm = FirebaseMessaging.instance;
-    // final notificationSettings = await fcm.requestPermission();
-
-    // if (notificationSettings.authorizationStatus ==
-    //     AuthorizationStatus.authorized) {
-    //   print("User granted permission");
-    // } else if (notificationSettings.authorizationStatus ==
-    //     AuthorizationStatus.provisional) {
-    //   print('User granted provisional permission');
-    // } else {
-    //   print('User declined or has not accepted permission');
-    // }
-    // final token = await fcm.getToken();
-    // print(token);
-    // setState(() {
-    //   mToken = token;
-    //   print("My token is $mToken");
-    // });
-    // saveToken(token!);
-    // fcm.sendMessage()
   }
 
   void saveToken(String token) async {
@@ -74,66 +51,6 @@ class _NavigatorScreenState extends State<NavigatorScreen> {
         .set({'token': token});
   }
 
-  // void loadFCM() async {
-  //   FirebaseMessaging.onBackgroundMessage((RemoteMessage message) async {
-  //     print(message);
-  //   });
-  //   // if (!kIsWeb) {
-  //   //   var channel = const AndroidNotificationChannel(
-  //   //     'high_importance_channel', // id
-  //   //     'High Importance Notifications', // title
-  //   //     importance: Importance.high,
-  //   //     enableVibration: true,
-  //   //   );
-
-  //   //   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-  //   //   /// Create an Android Notification Channel.
-  //   //   ///
-  //   //   /// We use this channel in the `AndroidManifest.xml` file to override the
-  //   //   /// default FCM channel to enable heads up notifications.
-  //   //   await flutterLocalNotificationsPlugin
-  //   //       .resolvePlatformSpecificImplementation<
-  //   //           AndroidFlutterLocalNotificationsPlugin>()
-  //   //       ?.createNotificationChannel(channel);
-
-  //   //   /// Update the iOS foreground notification presentation options to allow
-  //   //   /// heads up notifications.
-  //   //   await FirebaseMessaging.instance
-  //   //       .setForegroundNotificationPresentationOptions(
-  //   //     alert: true,
-  //   //     badge: true,
-  //   //     sound: true,
-  //   //   );
-  //   // }
-  // }
-
-  // void listenFCM() async {
-  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-  //     print(message);
-  //     // RemoteNotification? notification = message.notification;
-  //     // AndroidNotification? android = message.notification?.android;
-  //     // final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-  //     // if (notification != null && android != null && !kIsWeb) {
-  //     //   flutterLocalNotificationsPlugin.show(
-  //     //     notification.hashCode,
-  //     //     notification.title,
-  //     //     notification.body,
-  //     //     NotificationDetails(
-  //     //       android: AndroidNotificationDetails(
-  //     //         channel.id,
-  //     //         channel.name,
-  //     //         // TODO add a proper drawable resource to android, for now using
-  //     //         //      one that already exists in example app.
-  //     //         icon: 'launch_background',
-  //     //       ),
-  //     //     ),
-  //     //   );
-  //     // }
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     Widget activePage = const MembersScreen();
@@ -142,11 +59,7 @@ class _NavigatorScreenState extends State<NavigatorScreen> {
     }
 
     return Scaffold(
-      // body: activePage,
       body: activePage,
-      // _selectedPageIndex == 1
-      //     ? const ChatListScreen()
-      //     : const MembersScreen(),
       bottomNavigationBar: BottomNavigationBar(
           onTap: _selectPage,
           currentIndex: _selectedPageIndex,

@@ -32,38 +32,76 @@ class FirebaseNotificationService {
 
   void handleMessage(RemoteMessage? message) async {
     if (message == null) return;
-    // navigatorKey.currentWidget.
     final groupData = await firebaseUtils.groupsData(message.data['groupId']);
-    final groupTitle = await utils.getGroupTitle(groupData!);
 
-    // 여기서 groupTitle 보내주는 logic 짜기
+    // Find the grouptitle
+    final groupTitle = await utils.getGroupTitle(groupData!);
 
     navigatorKey.currentState?.push(
       MaterialPageRoute(
-          builder: (ctx) =>
-              //  NotificationScreen(
-              //   message: message,
-              // ),
-              ChatScreen(
+          builder: (ctx) => ChatScreen(
                 groupData: groupData,
                 groupTitle: groupTitle,
               )),
     );
-    // navigatorKey.currentState?.pushNamed(
-    //   // ChatListScreen().route,
-    //   NotificationScreen.route,
-    //   arguments: message,
-    // );
+  }
+
+  Future initLocalNotifications() async {
+    const iOS = DarwinInitializationSettings();
+    const android = AndroidInitializationSettings('@drawable/logo');
+    const settings = InitializationSettings(android: android, iOS: iOS);
+
+    await _localNotifications.initialize(settings,
+        // ㄱㄱ This is a method when a user clicks a local notification
+        onDidReceiveNotificationResponse: (notification) {
+      final message = RemoteMessage.fromMap(jsonDecode(notification.payload!));
+      handleMessage(message);
+    });
+
+    final platform = _localNotifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    await platform?.createNotificationChannel(_androidChannel);
   }
 
   Future initPushNotifications() async {
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
-            alert: true, badge: true, sound: true);
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
     FirebaseMessaging.instance.getInitialMessage().then(handleMessage);
+    // ㄴㄴ this line is for performing an action when the app is open from a terminated State via notification
+    // ㄴㄴ 그리고 app이 켜진 뒤, handle message method를 불러와서 내가 원하는 screen으로 page 이동을 시킴.
+
     FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
+    // ㄴㄴ It's working same as the above getInitialMessage, but it is in the case of app was running on background.
+    // ㄴㄴ 그리고 app이 켜진 뒤, handle message method를 불러와서 내가 원하는 screen으로 page 이동을 시킴.
+
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+    // ㄴㄴ this is a top-level function to detect a notification message on top-level
+
+    // ㄱㄱ this is for handling foreground notification.
+    FirebaseMessaging.onMessage.listen((message) {
+      final notification = message.notification;
+      if (notification == null) return;
+
+      _localNotifications.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            _androidChannel.id,
+            _androidChannel.name,
+            channelDescription: _androidChannel.description,
+            icon: '@drawable/logo',
+          ),
+        ),
+        payload: jsonEncode(message.toMap()),
+      );
+    });
   }
 
   Future<void> initNotification() async {
@@ -77,6 +115,7 @@ class FirebaseNotificationService {
       print('User granted provisional permission');
     } else {
       print('User declined or has not accepted permission');
+      return;
     }
     final token = await _firebaseMessaging.getToken();
     print('token: $token');
@@ -87,24 +126,25 @@ class FirebaseNotificationService {
     saveToken(token!);
 
     initPushNotifications();
+    initLocalNotifications();
 
-    FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
-    FirebaseMessaging.onMessage.listen((message) {
-      final notification = message.notification;
-      if (notification == null) return;
-      _localNotifications.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-              _androidChannel.id, _androidChannel.name,
-              channelDescription: _androidChannel.description,
-              icon: '@drawable/logo'),
-        ),
-        payload: jsonEncode(message.toMap()),
-      );
-    });
+    // FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+    // FirebaseMessaging.onMessage.listen((message) {
+    //   final notification = message.notification;
+    //   if (notification == null) return;
+    //   _localNotifications.show(
+    //     notification.hashCode,
+    //     notification.title,
+    //     notification.body,
+    //     NotificationDetails(
+    //       android: AndroidNotificationDetails(
+    //           _androidChannel.id, _androidChannel.name,
+    //           channelDescription: _androidChannel.description,
+    //           icon: '@drawable/logo'),
+    //     ),
+    //     payload: jsonEncode(message.toMap()),
+    //   );
+    // });
     // _firebaseMessaging.sendMessage()
   }
 
