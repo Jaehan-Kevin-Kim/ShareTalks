@@ -14,7 +14,8 @@ exports.myFunction = functions.firestore
   .document("messages/{groupId}/chats/{chatId}")
   .onCreate(async (snapshot, context) => {
     const chatData = snapshot.data();
-    // console.log("snapshot: ", snapshot);
+    console.log("snapshot: ", snapshot);
+    console.log("chatData: ", chatData);
     // console.log("context: ", context);
 
     const groupId = context.params.groupId;
@@ -56,6 +57,11 @@ exports.myFunction = functions.firestore
         title: chatData.senderName,
         body: chatData.text,
       },
+      data: {
+        groupId: groupId,
+        senderId: chatData.senderId,
+      },
+
       android: {
         notification: {
           icon: "logo",

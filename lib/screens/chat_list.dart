@@ -33,6 +33,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // final message = ModalRoute.of(context)!.settings.arguments;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,

@@ -145,6 +145,35 @@ class Util {
     return matchedGroup;
   }
 
+  Future<String> getGroupTitle(Map<String, dynamic> groupData) async {
+    final groupDataTitle = groupData['title'];
+    String groupTitle = '';
+    // If groupTitle is not null, it means group chat type is always group
+    if (groupDataTitle != null) {
+      groupTitle = groupDataTitle;
+
+      // return groupDataTitle;
+    } else {
+      // If groupChatType is self, return current user username
+      if (groupData['type'] == GroupChatType.self.index) {
+        // return
+        final currentUserData =
+            await firebaseUtils.usersData(firebaseUtils.currentUserUid);
+        groupTitle = currentUserData!['username'];
+        // Return opponent user's username because the group chat type should always be single
+      } else {
+        final opponentUserId = groupData['members']
+            .firstWhere((memberId) => memberId != firebaseUtils.currentUserUid);
+
+        final opponentUserData = await firebaseUtils.usersData(opponentUserId);
+
+        groupTitle = opponentUserData!['username'];
+      }
+    }
+
+    return groupTitle;
+  }
+
   ////////////////// 위는 추가로 생성 중인 세부 utils
   ///
 
