@@ -25,6 +25,7 @@ class Util {
       'title': groupTitle,
       'members': usersUids,
       'createdAt': Timestamp.now(),
+      'updatedAt': Timestamp.now(),
       'recentMessage': {},
       'image_url': null,
       'type': GroupChatType.single.index
@@ -52,6 +53,7 @@ class Util {
       'title': groupTitle,
       'members': usersUids,
       'createdAt': Timestamp.now(),
+      'updatedAt': Timestamp.now(),
       'image_url': imageUrl,
       'recentMessage': {},
       'type': GroupChatType.group

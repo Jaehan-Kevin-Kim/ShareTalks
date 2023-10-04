@@ -8,7 +8,7 @@
 PRODUCT_NAME = share_talks
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.shareTalks
+PRODUCT_BUNDLE_IDENTIFIER = com.jhkevin21.shareTalks
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2023 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2023 com.jhkevin21. All rights reserved.

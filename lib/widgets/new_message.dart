@@ -82,6 +82,7 @@ class _NewMessageState extends State<NewMessage> {
           .collection('groups')
           .doc(widget.groupData['id'])
           .update({
+        'updatedAt': newChatData.data()!['createdAt'],
         'recentMessage': {
           'chatText': newChatData.data()!['text'],
           'sentAt': newChatData.data()!['createdAt'],

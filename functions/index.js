@@ -36,7 +36,7 @@ exports.myFunction = functions.firestore
       .data()
       .members.filter((memberId) => memberId !== chatData.senderId);
 
-    // console.log(membersUids);
+    console.log(membersUids);
 
     // Get Image download url in Firebase Storage
     // admin.storage();
@@ -89,7 +89,7 @@ exports.myFunction = functions.firestore
             console.log(
               "userTokenDocument.data().token in for loops: ",
               userTokenDocument.data().token,
-              userTokens.push(),
+              // userTokens.push(),
             );
             const token = userTokenDocument.data().token;
             userTokens.push(token);
@@ -98,7 +98,8 @@ exports.myFunction = functions.firestore
         }),
       // }),
     );
-    // console.log("userTokens: ", userTokens);
+
+    console.log("userTokens: ", userTokens);
     // console.log("payload: ", payload);
     // console.log("senderName: ", chatData.senderName);
     // console.log("text: ", chatData.text);

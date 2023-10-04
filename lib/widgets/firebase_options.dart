@@ -63,7 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '774381553854',
     projectId: 'share-talks-c90cb',
     storageBucket: 'share-talks-c90cb.appspot.com',
-    iosClientId: '774381553854-9vsmbca3tqv2d97e3n08214bod9t9ed6.apps.googleusercontent.com',
-    iosBundleId: 'com.example.shareTalks',
+    iosClientId:
+        '774381553854-9vsmbca3tqv2d97e3n08214bod9t9ed6.apps.googleusercontent.com',
+    iosBundleId: 'com.jhekvin21.shareTalks',
   );
 }
