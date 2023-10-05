@@ -49,6 +49,8 @@ class _MembersScreenState extends State<MembersScreen> {
           // IconButton(
           //   onPressed: () {
           // FirebaseAuth.instance.signOut();
+          IconButton(onPressed: () {}, icon: const Icon(Icons.group_add)),
+
           PopupMenuButton(
               // surfaceTintColor: Colors.white,
               surfaceTintColor: Theme.of(context).colorScheme.background,
@@ -107,20 +109,42 @@ class _MembersScreenState extends State<MembersScreen> {
                 .toList();
 
             final me = snapshot.data!.docs
-                .firstWhere((doc) => doc.id == firebaseUtils.currentUserUid);
+                .firstWhere((doc) => doc.id == firebaseUtils.currentUserUid)
+                .data();
 
             return Column(
               children: [
                 MemberItem(
                   userData: me,
                 ),
-                const Divider(indent: 5),
+                const Divider(
+                  indent: 20,
+                  endIndent: 20,
+                ),
                 Expanded(
-                  child: ListView.builder(
-                      itemCount: usersDataWithoutMe.length,
-                      itemBuilder: (ctx, index) {
-                        return MemberItem(userData: usersDataWithoutMe[index]);
-                      }),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 20),
+                        child: Text(
+                          'People ${usersDataWithoutMe.length}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                          ),
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                            itemCount: usersDataWithoutMe.length,
+                            itemBuilder: (ctx, index) {
+                              return MemberItem(
+                                  userData: usersDataWithoutMe[index].data());
+                            }),
+                      )
+                    ],
+                  ),
                 )
               ],
             );

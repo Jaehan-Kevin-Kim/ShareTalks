@@ -89,6 +89,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       } else {
         avatarImage = const AssetImage('assets/images/group_default_image.png');
       }
+      // Image_url, and groupTitle is always changable in single chat.
       if (groupData['type'] == GroupChatType.single.index) {
         final oppositeUserUid = groupData['members']
             .firstWhere((member) => member != firebaseUtils.currentUserUid);
@@ -97,15 +98,15 @@ class _ChatListScreenState extends State<ChatListScreen> {
         chatTitle = opponentUserData['username'];
       }
 
-      if (groupData['type'] == GroupChatType.self.index) {
-        // 여기는 내 정보 불러와서 나의 username을 기재 해야 함. (내 정보는 그냥 get으로 넣어둘지 고민 됨)
-        // chatTitle =
-        final myUserData =
-            await firebaseUtils.usersData(firebaseUtils.currentUserUid);
+      // if (groupData['type'] == GroupChatType.self.index) {
+      //   // 여기는 내 정보 불러와서 나의 username을 기재 해야 함. (내 정보는 그냥 get으로 넣어둘지 고민 됨)
+      //   // chatTitle =
+      //   final myUserData =
+      //       await firebaseUtils.usersData(firebaseUtils.currentUserUid);
 
-        chatTitle = myUserData!['username']!;
-        avatarImage = NetworkImage(myUserData['imageUrl']);
-      }
+      //   chatTitle = myUserData!['username']!;
+      //   avatarImage = NetworkImage(myUserData['imageUrl']);
+      // }
 
       groupData.addAll({'avatarImage': avatarImage, 'chatTitle': chatTitle});
       updatedGroupsData.add(groupData);
@@ -123,7 +124,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         title: const Text('Chats'),
         actions: [
           IconButton(
-              onPressed: _createChatGroup, icon: const Icon(Icons.group_add))
+              onPressed: _createChatGroup, icon: const Icon(Icons.maps_ugc_rounded))
         ],
       ),
       body: StreamBuilder(

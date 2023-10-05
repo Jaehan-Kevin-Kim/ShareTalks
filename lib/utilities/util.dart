@@ -15,10 +15,36 @@ class Util {
       // required this.context,
       this.groupId = ''});
 
+  Future<Map<String, dynamic>> createSelfChatGroup(
+      String? groupTitle, String? imageUrl) async {
+    final newId = uuid.v4();
+    // var groupChatType = GroupChatType.self.index;
+
+    await firebaseUtils.groupsCollection.doc(newId).set({
+      'id': newId,
+      'title': groupTitle,
+      'members': [firebaseUtils.currentUserUid],
+      'createdAt': Timestamp.now(),
+      'updatedAt': Timestamp.now(),
+      'recentMessage': {},
+      'image_url': imageUrl,
+      'type': GroupChatType.self.index
+    });
+
+    // 2-1-2-3. Add groupId into user's collection group field
+    await firebaseUtils.usersDoc(firebaseUtils.currentUserUid).update({
+      'group': FieldValue.arrayUnion([newId])
+    });
+
+    // Get Group Data by using created groupId
+    final groupData = await firebaseUtils.groupsData(newId);
+    return groupData!;
+  }
+
   Future<Map<String, dynamic>> createSingleChatGroup(
       List<dynamic> usersUids, String? groupTitle) async {
     final newId = uuid.v4();
-    var groupChatType = GroupChatType.single.index;
+    // var groupChatType = GroupChatType.single.index;
 
     await firebaseUtils.groupsCollection.doc(newId).set({
       'id': newId,
@@ -110,6 +136,21 @@ class Util {
     final userUid = firebaseUtils.currentUserUid;
     final usersData = await firebaseUtils.usersData(userUid);
     return usersData!['group'].isEmpty;
+  }
+
+  Future<QueryDocumentSnapshot<Map<String, dynamic>>?>
+      findUserContainedSelfChatGroup() async {
+    final groupCollectionDocuments = await firebaseUtils.groupsCollection.get();
+    final matchedGroup = groupCollectionDocuments.docs
+        .where((groupCollectionDocuments) {
+          final groupCollectionData = groupCollectionDocuments.data();
+          return groupCollectionData['type'] == GroupChatType.self.index &&
+              groupCollectionData['members']
+                  .contains(firebaseUtils.currentUserUid);
+        })
+        .toList()
+        .firstOrNull;
+    return matchedGroup;
   }
 
   Future<QueryDocumentSnapshot<Map<String, dynamic>>?>
