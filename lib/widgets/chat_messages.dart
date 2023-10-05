@@ -20,6 +20,22 @@ class _ChatMessagesState extends State<ChatMessages> {
   // message라는 collection이 없는 상태에서 groupId로 찾을 수 있는 logic이 가능한지 확인 해 보기
 
   /////////////////////
+  ///
+// Helper method to format the date
+  String formatDate(DateTime date) {
+    final now = DateTime.now();
+    if (date.day == now.day &&
+        date.month == now.month &&
+        date.year == now.year) {
+      return "Today";
+    } else if (date.day == now.day - 1 &&
+        date.month == now.month &&
+        date.year == now.year) {
+      return "Yesterday";
+    } else {
+      return "${date.day}/${date.month}/${date.year}";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,26 +82,71 @@ class _ChatMessagesState extends State<ChatMessages> {
             final nextChatMessage = index + 1 < loadedMessage.length
                 ? loadedMessage[index + 1].data()
                 : null;
+            // final previousChatMessage =
+            //     index > 0 ? loadedMessage[index - 1].data() : null;
 
             final currentMessageUserId = chatMessage['senderId'];
             final nextMessageUserId =
                 nextChatMessage != null ? nextChatMessage['senderId'] : null;
             final nextUserIsSame = nextMessageUserId == currentMessageUserId;
 
-            if (nextUserIsSame) {
-              return MessageBubble.next(
-                  createdAt: chatMessage['createdAt'],
-                  message: chatMessage['text'],
-                  isMe: firebaseUtils.currentUserUid == currentMessageUserId);
-            } else {
-              return MessageBubble.first(
-                createdAt: chatMessage['createdAt'],
-                message: chatMessage['text'],
-                isMe: firebaseUtils.currentUserUid == currentMessageUserId,
-                userImage: chatMessage['senderImage'],
-                username: chatMessage['senderName'],
-              );
-            }
+            final nextChatMessageCreatedDate = nextChatMessage != null
+                ? nextChatMessage['createdAt'].toDate()
+                : null;
+
+            // final previousChatMessageCreatedDate = previousChatMessage != null
+            //     ? previousChatMessage['createdAt'].toDate()
+            //     : null;
+
+            // //  Check if a date divider is nedded
+            // bool showDateDivider = previousChatMessageCreatedDate == null ||
+            //     chatMessage['createdAt'].toDate().day !=
+            //         previousChatMessageCreatedDate.day;
+            //  Check if a date divider is nedded
+            bool showDateDivider = nextChatMessageCreatedDate == null ||
+                chatMessage['createdAt'].toDate().day !=
+                    nextChatMessageCreatedDate.day;
+
+            return Column(
+              children: [
+                if (showDateDivider)
+                  Container(
+                    margin: EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        top: 30,
+                        bottom: !nextUserIsSame ? 0 : 20),
+                    // padding: EdgeInsets.only(
+                    //     left: 16,
+                    //     right: 16,
+                    //     top: 30,
+                    //     bottom: !nextUserIsSame ? 30 : 0),
+                    child: Text(
+                      formatDate(chatMessage['createdAt'].toDate()),
+                      style: TextStyle(
+                          // color: Colors.grey,
+                          color:
+                              Theme.of(context).colorScheme.onPrimaryContainer,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                if (nextUserIsSame)
+                  MessageBubble.next(
+                      createdAt: chatMessage['createdAt'],
+                      message: chatMessage['text'],
+                      isMe:
+                          firebaseUtils.currentUserUid == currentMessageUserId),
+                if (!nextUserIsSame)
+                  MessageBubble.first(
+                    createdAt: chatMessage['createdAt'],
+                    message: chatMessage['text'],
+                    isMe: firebaseUtils.currentUserUid == currentMessageUserId,
+                    userImage: chatMessage['senderImage'],
+                    username: chatMessage['senderName'],
+                  )
+              ],
+            );
           },
 
           // itemBuilder: ((context, index) {

@@ -94,15 +94,15 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Scaffold(
           appBar: AppBar(
             title: Text(widget.groupTitle),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                },
-                icon: const Icon(Icons.exit_to_app),
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              )
-            ],
+            // actions: [
+            //   IconButton(
+            //     onPressed: () {
+            //       FirebaseAuth.instance.signOut();
+            //     },
+            //     icon: const Icon(Icons.exit_to_app),
+            //     color: Theme.of(context).colorScheme.onPrimaryContainer,
+            //   )
+            // ],
           ),
           body: Column(
             children: [

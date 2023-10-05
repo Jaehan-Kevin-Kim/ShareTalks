@@ -21,25 +21,6 @@ class _MembersScreenState extends State<MembersScreen> {
     if (value == 'DeleteAccount') {
       Navigator.of(context).push(
           MaterialPageRoute(builder: (context) => const DeleteAccountScreen()));
-      // showDialog(
-      //     context: context,
-      //     builder: (ctx) {
-      //       return AlertDialog(
-      //         title: const Text('Are you sure?'),
-      //         content: const Text(
-      //             "If you delete your account, you will lose all data for this application."),
-      //         actions: <Widget>[
-      //           TextButton(
-      //             onPressed: () => Navigator.pop(context, 'Cancel'),
-      //             child: const Text('Cancel'),
-      //           ),
-      //           TextButton(
-      //             onPressed: _deleteUserAccount,
-      //             child: const Text('Yes'),
-      //           ),
-      //         ],
-      //       );
-      //     });
     }
   }
 
@@ -124,37 +105,25 @@ class _MembersScreenState extends State<MembersScreen> {
             final usersDataWithoutMe = snapshot.data!.docs
                 .where((doc) => doc.id != firebaseUtils.currentUserUid)
                 .toList();
-            // final myData = snapshot.data!.docs
-            //     .firstWhere((doc) => doc.id == firebaseUtils.currentUserUid);
 
-            return ListView.builder(
-                itemCount: usersDataWithoutMe.length,
-                itemBuilder: (ctx, index) {
-                  // if (snapshot.data!.docs[index].id ==
-                  //     firebaseUtils.currentUserUid) {
-                  //   continue;
-                  // }
+            final me = snapshot.data!.docs
+                .firstWhere((doc) => doc.id == firebaseUtils.currentUserUid);
 
-                  return MemberItem(userData: usersDataWithoutMe[index]);
-                });
-            // return Column(
-            //   children: [
-            //     MemberItem(userData: myData),
-            //     const Divider(),
-            //     Expanded(
-            //       child: ListView.builder(
-            //           itemCount: usersDataWithoutMe.length,
-            //           itemBuilder: (ctx, index) {
-            //             // if (snapshot.data!.docs[index].id ==
-            //             //     firebaseUtils.currentUserUid) {
-            //             //   continue;
-            //             // }
-
-            //             return MemberItem(userData: usersDataWithoutMe[index]);
-            //           }),
-            //     )
-            //   ],
-            // );
+            return Column(
+              children: [
+                MemberItem(
+                  userData: me,
+                ),
+                const Divider(indent: 5),
+                Expanded(
+                  child: ListView.builder(
+                      itemCount: usersDataWithoutMe.length,
+                      itemBuilder: (ctx, index) {
+                        return MemberItem(userData: usersDataWithoutMe[index]);
+                      }),
+                )
+              ],
+            );
           }
           // return const Center(child: CircularProgressIndicator());
         }),
