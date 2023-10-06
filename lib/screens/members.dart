@@ -1,8 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:share_talks/controller/auth_controller.dart';
 import 'package:share_talks/screens/delete_account.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 import 'package:share_talks/widgets/member_item.dart';
+
+import '../controller/user_controller.dart';
 
 final firebaseUtils = FirebaseUtils();
 
@@ -14,8 +19,15 @@ class MembersScreen extends StatefulWidget {
 }
 
 class _MembersScreenState extends State<MembersScreen> {
+  final UserController userController = Get.find<UserController>();
+  // final AuthController authController = Get.put(AuthController());
+  final AuthController authController = Get.find<AuthController>();
+
+  bool initialLoadingStatus = false;
+
   _onSelectPopUpMenu(String value) {
     if (value == 'Signout') {
+      // userController.removeCurrentUserData();
       FirebaseAuth.instance.signOut();
     }
     if (value == 'DeleteAccount') {
@@ -37,6 +49,18 @@ class _MembersScreenState extends State<MembersScreen> {
         content: Text(error.message ?? 'Failed to Delete Account Action'),
       ));
     }
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> initialLoading() async {
+    initialLoadingStatus = true;
+    if (authController.isSignUp.value) {
+      await Future.delayed(const Duration(seconds: 2));
+      authController.changeSignUpStatus(false);
+    }
+
+    final usersCollection = await firebaseUtils.usersCollection.get();
+    initialLoadingStatus = false;
+    return usersCollection;
   }
 
   @override
@@ -91,67 +115,79 @@ class _MembersScreenState extends State<MembersScreen> {
           // )
         ],
       ),
-      body: FutureBuilder(
-        future: firebaseUtils.usersCollection.get(),
-        builder: ((context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
+      body: initialLoadingStatus
+          ? const Center(
               child: CircularProgressIndicator(),
-            );
-          }
-          if (!snapshot.hasData) {
-            return const Center(
-              child: Text("No Members"),
-            );
-          } else {
-            final usersDataWithoutMe = snapshot.data!.docs
-                .where((doc) => doc.id != firebaseUtils.currentUserUid)
-                .toList();
+            )
+          : FutureBuilder(
+              // future: firebaseUtils.usersCollection.get(),
+              future: initialLoading(),
+              // future: firebaseUtils.usersCollection.snapshots(),
+              builder: ((context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: Text("No Members"),
+                  );
+                } else {
+                  final usersDataWithoutMe = snapshot.data!.docs
+                      .where((doc) => doc.id != firebaseUtils.currentUserUid)
+                      .toList();
 
-            final me = snapshot.data!.docs
-                .firstWhere((doc) => doc.id == firebaseUtils.currentUserUid)
-                .data();
+                  final me = userController.currentUserData;
+                  // final me = snapshot.data!.docs
+                  //     .firstWhere((doc) => doc.id == firebaseUtils.currentUserUid)
+                  //     .data();
 
-            return Column(
-              children: [
-                MemberItem(
-                  userData: me,
-                ),
-                const Divider(
-                  indent: 20,
-                  endIndent: 20,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  return Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20),
-                        child: Text(
-                          'People ${usersDataWithoutMe.length}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                          ),
-                          textAlign: TextAlign.start,
-                        ),
+                      Obx(
+                        () => userController.currentUserData != me
+                            ? MemberItem(
+                                userData: me,
+                              )
+                            : const Center(child: CircularProgressIndicator()),
+                      ),
+                      const Divider(
+                        indent: 20,
+                        endIndent: 20,
                       ),
                       Expanded(
-                        child: ListView.builder(
-                            itemCount: usersDataWithoutMe.length,
-                            itemBuilder: (ctx, index) {
-                              return MemberItem(
-                                  userData: usersDataWithoutMe[index].data());
-                            }),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 20),
+                              child: Text(
+                                'People ${usersDataWithoutMe.length}',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                ),
+                                textAlign: TextAlign.start,
+                              ),
+                            ),
+                            Expanded(
+                              child: ListView.builder(
+                                  itemCount: usersDataWithoutMe.length,
+                                  itemBuilder: (ctx, index) {
+                                    return MemberItem(
+                                        userData:
+                                            usersDataWithoutMe[index].data());
+                                  }),
+                            )
+                          ],
+                        ),
                       )
                     ],
-                  ),
-                )
-              ],
-            );
-          }
-          // return const Center(child: CircularProgressIndicator());
-        }),
-      ),
+                  );
+                }
+                // return const Center(child: CircularProgressIndicator());
+              }),
+            ),
     );
   }
 }

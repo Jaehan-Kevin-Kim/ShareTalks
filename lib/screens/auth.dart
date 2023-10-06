@@ -4,7 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:share_talks/controller/auth_controller.dart';
+import 'package:share_talks/main.dart';
 import 'package:share_talks/widgets/user_image_picker.dart';
+
+import '../controller/user_controller.dart';
 
 final _firebaseAuth = FirebaseAuth.instance;
 
@@ -23,6 +28,8 @@ class _AuthScreenState extends State<AuthScreen> {
   String _enteredUsername = '';
   File? _selectedImage;
   bool _isAuthenticating = false;
+  final UserController userController = Get.find<UserController>();
+  final AuthController authController = Get.put(AuthController());
 
   _onSubmit() async {
     final isValid = _formKey.currentState!.validate();
@@ -42,6 +49,7 @@ class _AuthScreenState extends State<AuthScreen> {
           await _firebaseAuth.signInWithEmailAndPassword(
               email: _enteredEmail, password: _enteredPassword);
         } else {
+          authController.changeSignUpStatus(true);
           if (_selectedImage == null) {
             ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -60,6 +68,8 @@ class _AuthScreenState extends State<AuthScreen> {
               .child('user_images')
               .child('${userCredential.user!.uid}.jpg');
 
+          Future.delayed(const Duration(seconds: 5));
+
           await storageRef.putFile(_selectedImage!);
           final imageUrl = await storageRef.getDownloadURL();
           print(imageUrl);
@@ -75,6 +85,9 @@ class _AuthScreenState extends State<AuthScreen> {
             'group': [],
             'favorite': [],
           });
+
+          userController.updateCurrentUserData(userCredential.user!.uid);
+          Get.back();
         }
       } on FirebaseAuthException catch (error) {
         ScaffoldMessenger.of(context).clearSnackBars();
@@ -194,6 +207,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               TextButton(
                                   onPressed: () {
                                     setState(() {
+                                      _formKey.currentState!.reset();
                                       _isLoginMode = !_isLoginMode;
                                     });
                                   },

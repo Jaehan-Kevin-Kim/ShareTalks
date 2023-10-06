@@ -4,6 +4,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
+import 'package:share_talks/controller/user_controller.dart';
 import 'package:share_talks/screens/auth.dart';
 import 'package:share_talks/screens/navigator.dart';
 import 'package:share_talks/screens/notification.dart';
@@ -34,7 +36,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    final UserController controller = Get.put(UserController());
+    return GetMaterialApp(
       scaffoldMessengerKey: rootScaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
@@ -55,6 +58,7 @@ class MyApp extends StatelessWidget {
           //   return const SplashScreen();
           // }
           if (snapshot.hasData) {
+            controller.updateCurrentUserData(snapshot.data!.uid);
             // return const ChatScreen();
             // getUserToken();
             return const NavigatorScreen();

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:share_talks/screens/auth.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 
 final firebaseUtils = FirebaseUtils();
@@ -108,6 +109,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
 
       final result = reAuthenticate();
       await FirebaseAuth.instance.currentUser!.delete();
+      // FirebaseAuth.instance.
       FirebaseAuth.instance.signOut();
       returnToAuthScreen();
     } on FirebaseException catch (error) {
@@ -121,7 +123,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   }
 
   void returnToAuthScreen() {
-    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (ctx)=>const AuthScreen()));
   }
 
   void reAuthenticate() async {
