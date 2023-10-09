@@ -15,6 +15,21 @@ class Util {
       // required this.context,
       this.groupId = ''});
 
+  Future<void> signUpUser(
+      String userUid, String username, String email, String imageUrl) async {
+    await FirebaseFirestore.instance.collection('users').doc(userUid).set({
+      'id': userUid,
+      'username': username,
+      'email': email,
+      'image_url': imageUrl,
+      'group': [],
+      'favorite': [],
+      'active': true,
+      'createdAt': Timestamp.now(),
+      'updatedAt': Timestamp.now(),
+    });
+  }
+
   Future<Map<String, dynamic>> createSelfChatGroup(
       String? groupTitle, String? imageUrl) async {
     final newId = uuid.v4();

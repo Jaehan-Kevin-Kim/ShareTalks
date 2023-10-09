@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:share_talks/controller/user_controller.dart';
 import 'package:share_talks/screens/auth.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 
@@ -14,6 +17,8 @@ class DeleteAccountScreen extends StatefulWidget {
 
 class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   final passwordController = TextEditingController();
+  final UserController userController = Get.find<UserController>();
+
   bool passwordVisible = false;
   bool validatorActive = false;
   String validatorMessage = '';
@@ -108,9 +113,19 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
       //     .delete();
 
       final result = reAuthenticate();
+      await firebaseUtils
+          .usersDoc(firebaseUtils.currentUserUid)
+          .update({'active': false, 'updatedAt': Timestamp.now()});
+
+      // Also disable all groups having this user as a member
+      //
+      // Finally remove user's id from all users having this user's id as their favorites.
+
       await FirebaseAuth.instance.currentUser!.delete();
+
       // FirebaseAuth.instance.
       FirebaseAuth.instance.signOut();
+      userController.removeCurrentUserData();
       returnToAuthScreen();
     } on FirebaseException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -123,7 +138,8 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   }
 
   void returnToAuthScreen() {
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (ctx)=>const AuthScreen()));
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (ctx) => const AuthScreen()));
   }
 
   void reAuthenticate() async {

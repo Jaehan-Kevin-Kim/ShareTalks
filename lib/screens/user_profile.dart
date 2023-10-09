@@ -44,38 +44,66 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     showModalBottomSheet(
         isScrollControlled: true,
         context: context,
-        builder: (ctx) => Stack(
-              // alignment: Alignment.topLeft,
-              children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  child: Image.network(
-                    widget.userData['image_url'],
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                // SizedBox(
-                //   width: MediaQuery.of(context).size.width,
-                //   height: MediaQuery.of(context).size.height,
-                //   child: Image.network(
-                //     widget.userData['image_url'],
-                //     fit: BoxFit.contain,
-                //   ),
-                // ),
-                Positioned(
-                    top: 40,
-                    left: 20,
-                    // right: 100,
+        builder: (ctx) => SafeArea(
+              child: Column(
+                children: [
+                  Container(
+                    height: 80,
+                    alignment: Alignment.bottomLeft,
+                    color: Colors.white,
                     child: IconButton(
                       onPressed: () {
                         Navigator.of(ctx).pop();
                       },
                       iconSize: 25,
                       icon: const Icon(Icons.close),
-                    ))
-              ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height - 160,
+                    child: Image.network(
+                      widget.userData['image_url'],
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  Container(height: 80, color: Colors.white)
+                ],
+              ),
             ));
+
+    // Stack(
+    //       // alignment: Alignment.topLeft,
+    //       children: [
+    //         Container(height: 20,  child: IconButton(
+    //               onPressed: () {
+    //                 Navigator.of(ctx).pop();
+    //               },
+    //               iconSize: 25,
+    //               icon: const Icon(Icons.close),
+    //             ),),
+    //         SizedBox(
+    //           width: MediaQuery.of(context).size.width,
+    //           height: MediaQuery.of(context).size.height-40,
+    //           child: Image.network(
+    //             widget.userData['image_url'],
+    //             fit: BoxFit.contain,
+    //           ),
+    //         ),
+
+    //         Positioned(
+    //             top: 40,
+    //             left: 20,
+    //             // right: 100,
+    //             child: IconButton(
+    //               onPressed: () {
+    //                 Navigator.of(ctx).pop();
+    //               },
+    //               iconSize: 25,
+    //               icon: const Icon(Icons.close),
+    //             ))
+    //       ],
+    //     ));
   }
 
   @override
@@ -95,13 +123,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
     // backend 요청은 추후 util이나 get controller로 다 빼버리기.
     if (isFavorite) {
-      await firebaseUtils.usersDoc(currentUserData['id']).update({
+      // await firebaseUtils.usersDoc(currentUserData['id']).update({
+      //   'favorite': FieldValue.arrayUnion([widget.userData['id']])
+      await userController.updateUser(currentUserData['id'], {
         'favorite': FieldValue.arrayUnion([widget.userData['id']])
       });
+      // });
     } else {
-      await firebaseUtils.usersDoc(currentUserData['id']).update({
+      await userController.updateUser(currentUserData['id'], {
         'favorite': FieldValue.arrayRemove([widget.userData['id']])
       });
+      // await firebaseUtils.usersDoc(currentUserData['id']).update({
+      //   'favorite': FieldValue.arrayRemove([widget.userData['id']])
+      // });
     }
     showScaffoldMessanger();
 

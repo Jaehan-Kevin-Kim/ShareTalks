@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_talks/controller/auth_controller.dart';
+import 'package:share_talks/controller/status_controller.dart';
 import 'package:share_talks/main.dart';
 import 'package:share_talks/widgets/user_image_picker.dart';
 
@@ -30,6 +31,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isAuthenticating = false;
   final UserController userController = Get.find<UserController>();
   final AuthController authController = Get.put(AuthController());
+  final StatusController statusController = Get.put(StatusController());
 
   _onSubmit() async {
     final isValid = _formKey.currentState!.validate();
@@ -46,10 +48,14 @@ class _AuthScreenState extends State<AuthScreen> {
       try {
         if (_isLoginMode) {
           // final userCredentails =
-          await _firebaseAuth.signInWithEmailAndPassword(
+          final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
               email: _enteredEmail, password: _enteredPassword);
+
+          userController.updateCurrentUserData(userCredential.user!.uid);
         } else {
-          authController.changeSignUpStatus(true);
+          // authController.changeSignUpStatus(true);
+          statusController.updateLoadingStatus(true);
+
           if (_selectedImage == null) {
             ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -59,6 +65,7 @@ class _AuthScreenState extends State<AuthScreen> {
             )));
             return;
           }
+          authController.runLoadingSpinner();
           final userCredential =
               await _firebaseAuth.createUserWithEmailAndPassword(
                   email: _enteredEmail, password: _enteredPassword);
@@ -67,8 +74,6 @@ class _AuthScreenState extends State<AuthScreen> {
               .ref()
               .child('user_images')
               .child('${userCredential.user!.uid}.jpg');
-
-          Future.delayed(const Duration(seconds: 5));
 
           await storageRef.putFile(_selectedImage!);
           final imageUrl = await storageRef.getDownloadURL();
@@ -84,6 +89,9 @@ class _AuthScreenState extends State<AuthScreen> {
             'image_url': imageUrl,
             'group': [],
             'favorite': [],
+            'active': true,
+            'createdAt': Timestamp.now(),
+            'updatedAt': Timestamp.now(),
           });
 
           userController.updateCurrentUserData(userCredential.user!.uid);
