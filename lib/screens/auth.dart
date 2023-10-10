@@ -65,7 +65,6 @@ class _AuthScreenState extends State<AuthScreen> {
             )));
             return;
           }
-          authController.runLoadingSpinner();
           final userCredential =
               await _firebaseAuth.createUserWithEmailAndPassword(
                   email: _enteredEmail, password: _enteredPassword);

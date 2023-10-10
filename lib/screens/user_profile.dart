@@ -22,18 +22,8 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   final UserController userController = Get.find<UserController>();
   late Map<String, dynamic> currentUserData;
-  // need to check if this user is under favorite array.
-  // late bool isFavorite;
+
   late bool isFavorite;
-
-  // void findIsFavorite() async {
-  //   // final currentUserData =
-  //   //     await firebaseUtils.usersData(firebaseUtils.currentUserUid);
-  //   isFavorite = currentUserData['favorites']
-  //       .where((email) => email == widget.userData['email']);
-
-  //   print('userController: $userController.currentUserData');
-  // }
 
   onClickAvatarImage() {
     // showDialog(
@@ -285,6 +275,27 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         ),
                       ),
                     ),
+                    if (widget.userData['id'] == currentUserData['id'])
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          splashColor: Colors.black26,
+                          onTap: onEditProfile,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Column(
+                              // crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Icon(Icons.edit),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text('Profile')
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     // Column(
                     //   children: [
                     //     Icon(
