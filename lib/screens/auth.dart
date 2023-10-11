@@ -27,6 +27,7 @@ class _AuthScreenState extends State<AuthScreen> {
   String _enteredEmail = '';
   String _enteredPassword = '';
   String _enteredUsername = '';
+  String _enteredStatusMessage = '';
   File? _selectedImage;
   bool _isAuthenticating = false;
   final UserController userController = Get.find<UserController>();
@@ -89,6 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
             'group': [],
             'favorite': [],
             'active': true,
+            'statusMessage': _enteredStatusMessage,
             'createdAt': Timestamp.now(),
             'updatedAt': Timestamp.now(),
           });
@@ -122,7 +124,7 @@ class _AuthScreenState extends State<AuthScreen> {
             children: [
               Container(
                 margin: const EdgeInsets.only(
-                    top: 30, bottom: 20, left: 20, right: 20),
+                    top: 30, bottom: 15, left: 20, right: 20),
                 width: 200,
                 alignment: Alignment.center,
                 child: ClipRRect(
@@ -135,7 +137,8 @@ class _AuthScreenState extends State<AuthScreen> {
                 // child: Image.asset('assets/images/logo.png'),
               ),
               Card(
-                margin: const EdgeInsets.all(20),
+                margin: const EdgeInsets.only(
+                    top: 15, bottom: 20, left: 20, right: 20),
                 color: Colors.white,
                 child: SingleChildScrollView(
                   child: Padding(
@@ -152,8 +155,10 @@ class _AuthScreenState extends State<AuthScreen> {
                                 },
                               ),
                             TextFormField(
-                              decoration: const InputDecoration(
-                                  labelText: 'Email Address'),
+                              decoration: InputDecoration(
+                                  labelText: _isLoginMode
+                                      ? 'Email Address'
+                                      : 'Email Address *'),
                               autocorrect: false,
                               textCapitalization: TextCapitalization.none,
                               validator: (value) {
@@ -171,7 +176,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             if (!_isLoginMode)
                               TextFormField(
                                 decoration: const InputDecoration(
-                                    labelText: 'Username'),
+                                    labelText: 'Username *'),
                                 autocorrect: false,
                                 textCapitalization: TextCapitalization.none,
                                 validator: (value) {
@@ -184,8 +189,9 @@ class _AuthScreenState extends State<AuthScreen> {
                                 onSaved: (value) => _enteredUsername = value!,
                               ),
                             TextFormField(
-                              decoration:
-                                  const InputDecoration(labelText: 'Password'),
+                              decoration: InputDecoration(
+                                  labelText:
+                                      _isLoginMode ? 'Password' : 'Password *'),
                               obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 6) {
@@ -195,6 +201,14 @@ class _AuthScreenState extends State<AuthScreen> {
                               },
                               onSaved: (value) => _enteredPassword = value!,
                             ),
+                            if (!_isLoginMode)
+                              TextFormField(
+                                decoration: const InputDecoration(
+                                    labelText: 'Status Message'),
+                                maxLength: 25,
+                                onSaved: (value) =>
+                                    _enteredStatusMessage = value!,
+                              ),
                             const SizedBox(
                               height: 16,
                             ),

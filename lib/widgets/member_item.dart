@@ -21,7 +21,7 @@ class MemberItem extends StatefulWidget {
 class _MemberItemState extends State<MemberItem> {
   late Util utils = Util();
 
-  void onClickMemberUpdate() async {
+  void onClickAvatar() async {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => UserProfileScreen(userData: widget.userData)));
   }
@@ -77,18 +77,28 @@ class _MemberItemState extends State<MemberItem> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      // onTap: onClickMember,
-      onTap: onClickMemberUpdate,
-      leading: CircleAvatar(
-        foregroundImage: NetworkImage(widget.userData['image_url']),
-        // foregroundImage: NetworkImage(widget.userData['image_url']),
-        radius: 20,
-      ),
-      title: Text(
-        widget.userData['username'],
-        // widget.userData['username'],
-        style: const TextStyle(fontSize: 16),
+    return SizedBox(
+      height: 65,
+      child: Center(
+        child: ListTile(
+          // onTap: onClickMember,
+          onTap: onClickAvatar,
+          leading: CircleAvatar(
+            foregroundImage: NetworkImage(widget.userData['image_url']),
+            // foregroundImage: NetworkImage(widget.userData['image_url']),
+            radius: 20,
+          ),
+          // if (widget.userData['statusMessage'])
+          subtitle: widget.userData['statusMessage'].trim().isEmpty
+              ? null
+              : Text(widget.userData['statusMessage']),
+          // isThreeLine: true,
+          title: Text(
+            widget.userData['username'],
+            // widget.userData['username'],
+            style: const TextStyle(fontSize: 16),
+          ),
+        ),
       ),
     );
   }

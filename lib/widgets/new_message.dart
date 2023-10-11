@@ -23,6 +23,7 @@ class NewMessage extends StatefulWidget {
 class _NewMessageState extends State<NewMessage> {
   final _messageController = TextEditingController();
   bool isSending = false;
+  bool isTextFieldFocused = false;
 
   @override
   void dispose() {
@@ -149,6 +150,13 @@ class _NewMessageState extends State<NewMessage> {
       color: Colors.blueGrey.withOpacity(0.4),
       child: Row(
         children: [
+          if (!isTextFieldFocused)
+            Row(
+              children: [
+                Icon(Icons.image),
+                Icon(Icons.camera_alt),
+              ],
+            ),
           Expanded(
             child: TextField(
               decoration: const InputDecoration(labelText: 'Send a message...'),

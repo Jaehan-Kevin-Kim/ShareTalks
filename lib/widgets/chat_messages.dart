@@ -142,6 +142,7 @@ class _ChatMessagesState extends State<ChatMessages> {
                     createdAt: chatMessage['createdAt'],
                     message: chatMessage['text'],
                     isMe: firebaseUtils.currentUserUid == currentMessageUserId,
+                    userId: chatMessage['senderId'],
                     userImage: chatMessage['senderImage'],
                     username: chatMessage['senderName'],
                   )

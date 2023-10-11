@@ -6,8 +6,10 @@ import 'package:share_talks/widgets/camera_options.dart';
 
 class UserImagePicker extends StatefulWidget {
   final void Function(File image) onSelectedImage;
+  final bool isEditMode;
 
-  const UserImagePicker({super.key, required this.onSelectedImage});
+  const UserImagePicker(
+      {super.key, required this.onSelectedImage, this.isEditMode = false});
 
   @override
   State<UserImagePicker> createState() => _UserImagePickerState();
@@ -20,12 +22,12 @@ class _UserImagePickerState extends State<UserImagePicker> {
     final imagePicker = ImagePicker();
     final pickedImage = isCameraSelected
         ? await imagePicker.pickImage(
-            source: ImageSource.camera, imageQuality: 50, maxWidth: 200
-            // source: ImageSource.camera, imageQuality: 50, maxWidth: 200
+            source: ImageSource.camera, imageQuality: 80, maxWidth: 500
+            // source: ImageSource.camera, imageQuality: 80, maxWidth: 500
             )
         : await imagePicker.pickImage(
-            source: ImageSource.gallery, imageQuality: 50, maxWidth: 200);
-
+            source: ImageSource.gallery, imageQuality: 80, maxWidth: 500);
+    // final highResolutionImage = decodeImage
     if (pickedImage == null) {
       return;
     }

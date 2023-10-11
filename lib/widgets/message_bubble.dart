@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:share_talks/screens/user_profile.dart';
 
 final formatter = DateFormat.jm();
 
@@ -11,6 +13,7 @@ class MessageBubble extends StatelessWidget {
       required this.username,
       required this.message,
       required this.isMe,
+      required this.userId,
       required this.createdAt})
       : isFirstInSequence = true;
 
@@ -21,7 +24,8 @@ class MessageBubble extends StatelessWidget {
       required this.createdAt})
       : isFirstInSequence = false,
         userImage = null,
-        username = null;
+        username = null,
+        userId = null;
 
   final bool isFirstInSequence;
 
@@ -30,8 +34,16 @@ class MessageBubble extends StatelessWidget {
 
   final String? username;
   final String message;
+  final String? userId;
 
   final bool isMe;
+
+  void onClickAvatar() async {
+    final userData = await firebaseUtils.usersData(userId!);
+    Get.to(UserProfileScreen(userData: userData!));
+    // Navigator.of(context).push(MaterialPageRoute(
+    //     builder: (context) => UserProfileScreen(userData: widget.userData)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,12 +66,15 @@ class MessageBubble extends StatelessWidget {
           Positioned(
             top: 15,
             right: isMe ? 0 : null,
-            child: CircleAvatar(
-              backgroundImage: NetworkImage(
-                userImage!,
+            child: GestureDetector(
+              onTap: onClickAvatar,
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(
+                  userImage!,
+                ),
+                backgroundColor: theme.colorScheme.primary.withAlpha(180),
+                radius: 23,
               ),
-              backgroundColor: theme.colorScheme.primary.withAlpha(180),
-              radius: 23,
             ),
           ),
         Container(

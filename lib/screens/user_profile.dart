@@ -1,17 +1,25 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:share_talks/controller/user_controller.dart';
 import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 import 'package:share_talks/utilities/util.dart';
+import 'package:share_talks/widgets/camera_options.dart';
 
 final firebaseUtils = FirebaseUtils();
 final Util utils = Util();
 
 class UserProfileScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
-  const UserProfileScreen({super.key, required this.userData});
+  const UserProfileScreen({
+    super.key,
+    required this.userData,
+  });
 
   @override
   State<UserProfileScreen> createState() {
@@ -22,8 +30,25 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   final UserController userController = Get.find<UserController>();
   late Map<String, dynamic> currentUserData;
+  bool isEditMode = false;
+  String? updatedStatusMessage;
+  File? _updatedImage;
+
+  late TextEditingController statusMessageController;
 
   late bool isFavorite;
+
+  @override
+  void initState() {
+    super.initState();
+    currentUserData = userController.currentUserData.obs.value;
+    isFavorite = currentUserData['favorite']
+        .where((userId) => userId == widget.userData['id'])
+        .isNotEmpty;
+    statusMessageController =
+        TextEditingController(text: widget.userData['statusMessage']);
+    print('userController: ${userController.currentUserData.obs.value}');
+  }
 
   onClickAvatarImage() {
     // showDialog(
@@ -61,49 +86,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ],
               ),
             ));
-
-    // Stack(
-    //       // alignment: Alignment.topLeft,
-    //       children: [
-    //         Container(height: 20,  child: IconButton(
-    //               onPressed: () {
-    //                 Navigator.of(ctx).pop();
-    //               },
-    //               iconSize: 25,
-    //               icon: const Icon(Icons.close),
-    //             ),),
-    //         SizedBox(
-    //           width: MediaQuery.of(context).size.width,
-    //           height: MediaQuery.of(context).size.height-40,
-    //           child: Image.network(
-    //             widget.userData['image_url'],
-    //             fit: BoxFit.contain,
-    //           ),
-    //         ),
-
-    //         Positioned(
-    //             top: 40,
-    //             left: 20,
-    //             // right: 100,
-    //             child: IconButton(
-    //               onPressed: () {
-    //                 Navigator.of(ctx).pop();
-    //               },
-    //               iconSize: 25,
-    //               icon: const Icon(Icons.close),
-    //             ))
-    //       ],
-    //     ));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    currentUserData = userController.currentUserData.obs.value;
-    isFavorite = currentUserData['favorite']
-        .where((userId) => userId == widget.userData['id'])
-        .isNotEmpty;
-    print('userController: ${userController.currentUserData.obs.value}');
   }
 
   Future<void> onClickFavoriteButton() async {
@@ -135,6 +117,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   void showScaffoldMessanger() {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        duration: const Duration(seconds: 1),
         content: Text(isFavorite
             ? 'Added \'${widget.userData['username']}\' to Favorites'
             : 'Removed \'${widget.userData['username']}\' from Favorites')));
@@ -176,6 +159,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     sendToChatScreen(newGroupData, widget.userData['username']);
   }
 
+  void onEditProfile() {
+    setState(() {
+      isEditMode = true;
+    });
+  }
+
   void sendToChatScreen(Map<String, dynamic> groupData, String groupTitle) {
     // Get.to(ChatScreen(groupData: groupData, groupTitle: groupTitle));
     Navigator.of(context).push(
@@ -190,134 +179,248 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
+  void _showEditStatusMessagePopup() {
+    String editedText = '';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Update Status Message"),
+        titleTextStyle: TextStyle(
+            fontSize: 18, color: Theme.of(context).colorScheme.primary),
+        content: TextField(
+          controller: statusMessageController,
+          autofocus: true,
+          onChanged: (text) {
+            editedText = text;
+          },
+        ),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text("Cancel")),
+          TextButton(
+              onPressed: () {
+                setState(() {
+                  updatedStatusMessage = statusMessageController.text;
+                });
+                print(editedText);
+                Get.back();
+              },
+              child: const Text("Save"))
+        ],
+      ),
+    );
+  }
+
+  Future<void> onSaveProfile() async {
+    String? imageUrl;
+    if (_updatedImage != null) {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('user_images')
+          .child('${currentUserData['id']}.jpg');
+
+      await storageRef.putFile(_updatedImage!);
+      imageUrl = await storageRef.getDownloadURL();
+    }
+
+    userController.updateUser(currentUserData['id'], {
+      'statusMessage': updatedStatusMessage ?? widget.userData['statusMessage'],
+      'image_url': imageUrl ?? currentUserData['image_url']
+    });
+    setState(() {
+      isEditMode = false;
+    });
+  }
+
+/////// Below code should be refactored with same code in UserImageaPickup class
+  void _getImage(bool isCameraSelected) async {
+    final imagePicker = ImagePicker();
+    final pickedImage = isCameraSelected
+        ? await imagePicker.pickImage(
+            source: ImageSource.camera, imageQuality: 80, maxWidth: 500
+            // source: ImageSource.camera, imageQuality: 80, maxWidth: 500
+            )
+        : await imagePicker.pickImage(
+            source: ImageSource.gallery, imageQuality: 80, maxWidth: 500);
+    // final highResolutionImage = decodeImage
+    if (pickedImage == null) {
+      return;
+    }
+
+    setState(
+      () {
+        _updatedImage = File(pickedImage.path);
+      },
+    );
+    // widget.onSelectedImage(_updatedImage!);
+  }
+
+  void cameraOption() {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return CameraOptions(onSelectCameraOption: _getImage);
+        });
+  }
+
+  void onCancelEditProfile() {
+    setState(() {
+      isEditMode = false;
+      statusMessageController.text = "";
+      updatedStatusMessage = "";
+      _updatedImage = null;
+    });
+  }
+
+///////////////
+  ///
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.userData['username']),
-        actions: [
-          if (widget.userData['id'] != currentUserData['id'])
-            IconButton(
-                onPressed: onClickFavoriteButton,
-                icon: Icon(
-                  isFavorite ? Icons.star : Icons.star_border_outlined,
-                  size: 30,
-                ))
-        ],
-      ),
-      body:
-          //  Theme(
-          //   data: ThemeData(
-          //       // iconTheme: IconThemeData(color: Colors.white),
-          //       // typography: Typography(white: TextTheme.),
-          //       // primaryColor: Colors.white,
-
-          //       //     // colorScheme: Colors.white,
-          //       //     primaryColor: Colors.white,
-          //       ),
-          //   // child: DefaultTextStyle(
-          //   //   style: TextStyle(color: Colors.white),
-          //   child:
-          Stack(children: [
-        Container(
-            // foregroundDecoration: ,
-
-            // decoration: BoxDecoration(
-            //     color: Theme.of(context).colorScheme.onPrimaryContainer),
-            color: Theme.of(context).colorScheme.onPrimary),
-        // ),
-        Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                GestureDetector(
-                  onTap: onClickAvatarImage,
-                  child: CircleAvatar(
-                    radius: 70,
-                    backgroundImage: NetworkImage(widget.userData['image_url']),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(widget.userData['username']),
-                // 상태 메세지 추후 넣기 (profile에 상태 message 추가할 수 있게 하기),
-                const SizedBox(
-                  height: 20,
-                ),
-                const Divider(),
-                const SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // TextButtonIc(onPressed: (){}, icon: Icon(Icons.chat_bubble_outline),),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        splashColor: Colors.black26,
-                        onTap: onClickChat,
-                        child: const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Column(
-                            // crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Icon(Icons.chat_bubble_outline_rounded),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text('Chat')
-                            ],
-                          ),
+        appBar: AppBar(
+          title: Text(widget.userData['username']),
+          actions: [
+            if (widget.userData['id'] != currentUserData['id'])
+              IconButton(
+                  onPressed: onClickFavoriteButton,
+                  icon: Icon(
+                    isFavorite ? Icons.star : Icons.star_border_outlined,
+                    size: 30,
+                  )),
+            if (isEditMode)
+              TextButton(
+                  onPressed: onCancelEditProfile, child: const Text("Cancel")),
+            if (isEditMode)
+              TextButton(onPressed: onSaveProfile, child: const Text("Save"))
+          ],
+        ),
+        body: Stack(children: [
+          Container(color: Theme.of(context).colorScheme.onPrimary),
+          Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: isEditMode ? cameraOption : onClickAvatarImage,
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 70,
+                          backgroundImage: _updatedImage == null
+                              ? NetworkImage(widget.userData['image_url'])
+                              : FileImage(_updatedImage!) as ImageProvider,
                         ),
-                      ),
+                        if (isEditMode)
+                          Positioned(
+                            bottom: 5,
+                            right: 5,
+                            child: Container(
+                                width: 35,
+                                height: 35,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                  border:
+                                      Border.all(color: Colors.black, width: 1),
+                                ),
+                                // color: Colors.white,
+                                child: const Icon(
+                                  Icons.photo_camera,
+                                )),
+                          )
+                      ],
                     ),
-                    if (widget.userData['id'] == currentUserData['id'])
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Text(widget.userData['username']),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      updatedStatusMessage != null &&
+                              updatedStatusMessage!.trim().isNotEmpty
+                          ? Text(updatedStatusMessage!)
+                          : isEditMode
+                              ? Text(widget.userData['statusMessage']
+                                      .trim()
+                                      .isEmpty
+                                  ? 'Leave your status message'
+                                  : widget.userData['statusMessage'])
+                              : Text(widget.userData['statusMessage']),
+                      if (isEditMode)
+                        IconButton(
+                            onPressed: _showEditStatusMessagePopup,
+                            icon: const Icon(Icons.edit))
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const Divider(),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
                           splashColor: Colors.black26,
-                          onTap: onEditProfile,
+                          onTap: onClickChat,
                           child: const Padding(
                             padding: EdgeInsets.all(8.0),
                             child: Column(
-                              // crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Icon(Icons.edit),
+                                Icon(Icons.chat_bubble_outline_rounded),
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Text('Profile')
+                                Text('Chat')
                               ],
                             ),
                           ),
                         ),
                       ),
-                    // Column(
-                    //   children: [
-                    //     Icon(
-                    //       Icons.favorite_border,
-                    //       size: 25,
-                    //     ),
-                    //     SizedBox(
-                    //       height: 10,
-                    //     ),
-                    //     Text('Favorite')
-                    //   ],
-                    // )
-                  ],
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-              ],
-            )),
-      ]),
-      // ),
-      // ),
-    );
+                      if (widget.userData['id'] == currentUserData['id'])
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            splashColor: Colors.black26,
+                            onTap: onEditProfile,
+                            child: const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Column(
+                                // crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Icon(Icons.edit),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text('Profile')
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ],
+              )),
+        ]
+            // );
+            )
+        // }),
+        // ),
+        );
   }
 }
