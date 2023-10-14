@@ -10,6 +10,9 @@ import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 import 'package:share_talks/utilities/util.dart';
 import 'package:share_talks/widgets/camera_options.dart';
+import 'package:share_talks/widgets/full_screen_image.dart';
+
+import '../utilities/image_util.dart';
 
 final firebaseUtils = FirebaseUtils();
 final Util utils = Util();
@@ -56,36 +59,44 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     //     builder: (ctx) => Dialog(
     //           child: Image.network(widget.userData['image_url']),
     //         ));
+    Image image = Image.network(
+      widget.userData['image_url'],
+      fit: BoxFit.contain,
+    );
     showModalBottomSheet(
         isScrollControlled: true,
         context: context,
-        builder: (ctx) => SafeArea(
-              child: Column(
-                children: [
-                  Container(
-                    height: 80,
-                    alignment: Alignment.bottomLeft,
-                    color: Colors.white,
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                      },
-                      iconSize: 25,
-                      icon: const Icon(Icons.close),
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height - 160,
-                    child: Image.network(
-                      widget.userData['image_url'],
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  Container(height: 80, color: Colors.white)
-                ],
-              ),
-            ));
+        builder: (ctx) => FullScreenImage(image: image));
+    // SafeArea(
+    //   child: Column(
+    //     children: [
+    //       Container(
+    //         height: 80,
+    //         alignment: Alignment.centerLeft,
+    //         color: Colors.black,
+    //         child: IconButton(
+    //           onPressed: () {
+    //             Navigator.of(ctx).pop();
+    //           },
+    //           iconSize: 25,
+    //           icon: const Icon(
+    //             Icons.close,
+    //             color: Colors.white,
+    //           ),
+    //         ),
+    //       ),
+    //       SizedBox(
+    //         width: MediaQuery.of(context).size.width,
+    //         height: MediaQuery.of(context).size.height - 160,
+    //         child: Image.network(
+    //           widget.userData['image_url'],
+    //           fit: BoxFit.contain,
+    //         ),
+    //       ),
+    //       Container(height: 80, color: Colors.black)
+    //     ],
+    //   ),
+    // ));
   }
 
   Future<void> onClickFavoriteButton() async {
@@ -237,22 +248,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
 /////// Below code should be refactored with same code in UserImageaPickup class
   void _getImage(bool isCameraSelected) async {
-    final imagePicker = ImagePicker();
-    final pickedImage = isCameraSelected
-        ? await imagePicker.pickImage(
-            source: ImageSource.camera, imageQuality: 80, maxWidth: 500
-            // source: ImageSource.camera, imageQuality: 80, maxWidth: 500
-            )
-        : await imagePicker.pickImage(
-            source: ImageSource.gallery, imageQuality: 80, maxWidth: 500);
-    // final highResolutionImage = decodeImage
-    if (pickedImage == null) {
+    _updatedImage = await ImageUtil.selectImage(isCameraSelected);
+
+    if (_updatedImage == null) {
       return;
     }
 
     setState(
       () {
-        _updatedImage = File(pickedImage.path);
+        _updatedImage = _updatedImage;
       },
     );
     // widget.onSelectedImage(_updatedImage!);

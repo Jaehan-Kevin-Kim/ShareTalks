@@ -12,6 +12,7 @@ import 'package:share_talks/widgets/chat_list_item.dart';
 final fBF = FirebaseFirestore.instance;
 final firebaseUtils = FirebaseUtils();
 String? mToken;
+double? safeAreaHeightInNavigatorBar;
 
 class NavigatorScreen extends StatefulWidget {
   final int selectedPageIndex;

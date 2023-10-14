@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
+import 'package:share_talks/utilities/image_util.dart';
 import 'package:share_talks/utilities/util.dart';
 import 'package:share_talks/widgets/camera_options.dart';
 import 'package:share_talks/widgets/create_chat_group_item.dart';
@@ -163,6 +164,24 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
   }
 
   void _getImage(bool isCameraSelected) async {
+    _selectedImage = await ImageUtil.selectImage(isCameraSelected,
+        imageQuality: 50, maxWidth: 200);
+
+    if (_selectedImage == null) {
+      _selectedImage = File('assets/images/group_default_image.png');
+      return;
+    }
+
+    setState(
+      () {
+        _selectedImage = _selectedImage;
+      },
+    );
+    // onSelectedImage(_selectedImage!);
+  }
+
+/* 아래는 정상 동작 코드
+  void _getImage(bool isCameraSelected) async {
     final imagePicker = ImagePicker();
     final pickedImage = isCameraSelected
         ? await imagePicker.pickImage(
@@ -184,6 +203,7 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
     );
     // onSelectedImage(_selectedImage!);
   }
+   */
 
   @override
   Widget build(BuildContext context) {

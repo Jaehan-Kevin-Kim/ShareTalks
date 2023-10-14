@@ -1,6 +1,14 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:get/get.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:share_talks/controller/gallery_controller.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 import 'package:uuid/uuid.dart';
+
+import '../controller/user_controller.dart';
 
 final firebaseUtils = FirebaseUtils();
 const uuid = Uuid();
@@ -14,6 +22,10 @@ class Util {
       {
       // required this.context,
       this.groupId = ''});
+  // final userId = firebaseUtils.currentUserUid;
+
+  UserController userController = Get.put(UserController());
+  GalleryController galleryController = Get.put(GalleryController());
 
   Future<void> signUpUser(
       String userUid, String username, String email, String imageUrl) async {
@@ -152,6 +164,97 @@ class Util {
     final usersData = await firebaseUtils.usersData(userUid);
     return usersData!['group'].isEmpty;
   }
+
+  /* Logic for Sending Message */
+// 공통점만 모아둔 method 만들기
+  Future<void> sendChatCommon({
+    required String groupId,
+    // required DocumentSnapshot<Map<String, dynamic>> userData,
+    String? messageText,
+    String? imageUrl,
+  }) async {
+    final myUserData = userController.currentUserData;
+
+    final newChat = await FirebaseFirestore.instance
+        .collection('messages')
+        .doc(groupId)
+        .collection('chats')
+        .add({
+      'createdAt': Timestamp.now(),
+      'text': messageText ?? '',
+      'image': imageUrl ?? '',
+      'senderId': firebaseUtils.currentUserUid,
+      'senderImage': myUserData['image_url'],
+      'senderName': myUserData['username'],
+    });
+
+// 아래공통
+    final newChatData = await FirebaseFirestore.instance
+        .collection('messages')
+        .doc(groupId)
+        .collection('chats')
+        .doc(newChat.id)
+        .get();
+
+    /// 2. After new chat creation, update recentMessage in group collection
+    await FirebaseFirestore.instance.collection('groups').doc(groupId).update({
+      'updatedAt': newChatData.data()!['createdAt'],
+      'recentMessage': {
+        'chatText': newChatData.data()!['text'],
+        'sentAt': newChatData.data()!['createdAt'],
+        'sendBy': newChatData.data()!['senderId'],
+        'chatId': newChatData.id,
+      }
+    });
+  }
+
+  // First common methods
+  Future<void> sendTextChat(
+      {required String groupId, String? typedMessage}) async {
+    // final authUser = firebaseUtils.currentUserUid;
+    await sendChatCommon(groupId: groupId, messageText: typedMessage);
+
+    // if it's for single image
+
+    // if it's for multiple images
+  }
+
+  Future<void> sendSingleImageChat(
+      {required String groupId, File? singleImageFile}) async {
+    final storageRef = FirebaseStorage.instance
+        .ref()
+        .child('chat_images')
+        .child(groupId)
+        .child('${uuid.v4()}.jpg');
+    // await storageRef.
+    await storageRef.putFile(singleImageFile!);
+    final imageUrl = await storageRef.getDownloadURL();
+    // return imageUrl;
+    await sendChatCommon(groupId: groupId, imageUrl: imageUrl);
+  }
+
+  Future<void> sendMultipleImagesChat({required String groupId}) async {
+    final selectedImages = galleryController.selectedImagesWithIndexes
+        .map((imageWithIndex) => imageWithIndex['image']);
+
+    for (AssetEntity selectedImage in selectedImages) {
+      final File? imageFile = await selectedImage.file;
+
+// ///////////
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('chat_images')
+          .child(groupId)
+          .child('${uuid.v4()}.jpg');
+      // await storageRef.
+      await storageRef.putFile(imageFile!);
+      final imageUrl = await storageRef.getDownloadURL();
+      // return imageUrl;
+      await sendChatCommon(groupId: groupId, imageUrl: imageUrl);
+    }
+  }
+
+  /* Logic for find group */
 
   Future<QueryDocumentSnapshot<Map<String, dynamic>>?>
       findUserContainedSelfChatGroup() async {

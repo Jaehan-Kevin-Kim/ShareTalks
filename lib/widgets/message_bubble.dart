@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:share_talks/screens/user_profile.dart';
+import 'package:share_talks/widgets/full_screen_image.dart';
 
 final formatter = DateFormat.jm();
 
@@ -14,6 +15,7 @@ class MessageBubble extends StatelessWidget {
       required this.message,
       required this.isMe,
       required this.userId,
+      required this.chatImage,
       required this.createdAt})
       : isFirstInSequence = true;
 
@@ -21,6 +23,7 @@ class MessageBubble extends StatelessWidget {
       {super.key,
       required this.message,
       required this.isMe,
+      required this.chatImage,
       required this.createdAt})
       : isFirstInSequence = false,
         userImage = null,
@@ -34,6 +37,7 @@ class MessageBubble extends StatelessWidget {
 
   final String? username;
   final String message;
+  final String chatImage;
   final String? userId;
 
   final bool isMe;
@@ -44,6 +48,76 @@ class MessageBubble extends StatelessWidget {
     // Navigator.of(context).push(MaterialPageRoute(
     //     builder: (context) => UserProfileScreen(userData: widget.userData)));
   }
+
+  void onTapImage(BuildContext context) {
+    final image = Image.network(chatImage, fit: BoxFit.contain);
+
+    showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        builder: (ctx) => FullScreenImage(image: image)
+        // SafeArea(
+        //       child: Column(
+        //         children: [
+        //           Container(
+        //             height: 80,
+        //             alignment: Alignment.bottomLeft,
+        //             color: Colors.white,
+        //             child: IconButton(
+        //               onPressed: () {
+        //                 Navigator.of(ctx).pop();
+        //               },
+        //               iconSize: 25,
+        //               icon: const Icon(Icons.close),
+        //             ),
+        //           ),
+        //           SizedBox(
+        //             width: MediaQuery.of(context).size.width,
+        //             height: MediaQuery.of(context).size.height - 160,
+        //             child: Image.network(
+        //               chatImage,
+        //               fit: BoxFit.contain,
+        //             ),
+        //           ),
+        //           Container(height: 80, color: Colors.white)
+        //         ],
+        //       ),
+        //     )
+        );
+  }
+
+  // void onTapImage(BuildContext context) {
+  //   showModalBottomSheet(
+  //       isScrollControlled: true,
+  //       context: context,
+  //       builder: (ctx) => SafeArea(
+  //             child: Column(
+  //               children: [
+  //                 Container(
+  //                   height: 80,
+  //                   alignment: Alignment.bottomLeft,
+  //                   color: Colors.white,
+  //                   child: IconButton(
+  //                     onPressed: () {
+  //                       Navigator.of(ctx).pop();
+  //                     },
+  //                     iconSize: 25,
+  //                     icon: const Icon(Icons.close),
+  //                   ),
+  //                 ),
+  //                 SizedBox(
+  //                   width: MediaQuery.of(context).size.width,
+  //                   height: MediaQuery.of(context).size.height - 160,
+  //                   child: Image.network(
+  //                     chatImage,
+  //                     fit: BoxFit.contain,
+  //                   ),
+  //                 ),
+  //                 Container(height: 80, color: Colors.white)
+  //               ],
+  //             ),
+  //           ));
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -132,16 +206,26 @@ class MessageBubble extends StatelessWidget {
                       vertical: 4,
                       horizontal: 12,
                     ),
-                    child: Text(
-                      message,
-                      style: TextStyle(
-                        height: 1.3,
-                        color: isMe
-                            ? Colors.black87
-                            : theme.colorScheme.onSecondary,
-                      ),
-                      softWrap: true,
-                    ),
+
+                    child: chatImage.isEmpty
+                        ? Text(
+                            message,
+                            style: TextStyle(
+                              height: 1.3,
+                              color: isMe
+                                  ? Colors.black87
+                                  : theme.colorScheme.onSecondary,
+                            ),
+                            softWrap: true,
+                          )
+                        : SizedBox(
+                            width: 150,
+                            height: 220,
+                            child: GestureDetector(
+                                onTap: () {
+                                  onTapImage(context);
+                                },
+                                child: Image(image: NetworkImage(chatImage)))),
                   ),
                 ],
               ),

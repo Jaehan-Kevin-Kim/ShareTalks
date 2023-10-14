@@ -64,6 +64,7 @@ class _AuthScreenState extends State<AuthScreen> {
               'Please add a photo!',
               style: TextStyle(color: Colors.red),
             )));
+            _isAuthenticating = false;
             return;
           }
           final userCredential =

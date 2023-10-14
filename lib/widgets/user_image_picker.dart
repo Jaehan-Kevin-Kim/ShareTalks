@@ -2,14 +2,19 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:share_talks/utilities/image_util.dart';
 import 'package:share_talks/widgets/camera_options.dart';
 
 class UserImagePicker extends StatefulWidget {
   final void Function(File image) onSelectedImage;
+  final bool isCameraSelected;
   final bool isEditMode;
 
   const UserImagePicker(
-      {super.key, required this.onSelectedImage, this.isEditMode = false});
+      {super.key,
+      required this.onSelectedImage,
+      this.isCameraSelected = false,
+      this.isEditMode = false});
 
   @override
   State<UserImagePicker> createState() => _UserImagePickerState();
@@ -18,6 +23,19 @@ class UserImagePicker extends StatefulWidget {
 class _UserImagePickerState extends State<UserImagePicker> {
   File? _selectedImage;
 
+  void _getImage(bool isCameraSelected) async {
+    _selectedImage = await ImageUtil.selectImage(isCameraSelected);
+    if (_selectedImage == null) return;
+
+    setState(
+      () {
+        _selectedImage = _selectedImage;
+      },
+    );
+    widget.onSelectedImage(_selectedImage!);
+  }
+
+/*
   void _getImage(bool isCameraSelected) async {
     final imagePicker = ImagePicker();
     final pickedImage = isCameraSelected
@@ -39,6 +57,7 @@ class _UserImagePickerState extends State<UserImagePicker> {
     );
     widget.onSelectedImage(_selectedImage!);
   }
+  */
 
   void cameraOption() {
     showModalBottomSheet(

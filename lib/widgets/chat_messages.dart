@@ -135,12 +135,14 @@ class _ChatMessagesState extends State<ChatMessages> {
                   MessageBubble.next(
                       createdAt: chatMessage['createdAt'],
                       message: chatMessage['text'],
+                      chatImage: chatMessage['image'],
                       isMe:
                           firebaseUtils.currentUserUid == currentMessageUserId),
                 if (!nextUserIsSame)
                   MessageBubble.first(
                     createdAt: chatMessage['createdAt'],
                     message: chatMessage['text'],
+                    chatImage: chatMessage['image'],
                     isMe: firebaseUtils.currentUserUid == currentMessageUserId,
                     userId: chatMessage['senderId'],
                     userImage: chatMessage['senderImage'],
