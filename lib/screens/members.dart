@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_talks/controller/auth_controller.dart';
 import 'package:share_talks/controller/status_controller.dart';
+import 'package:share_talks/main.dart';
+import 'package:share_talks/screens/auth.dart';
 import 'package:share_talks/screens/delete_account.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 import 'package:share_talks/widgets/member_item.dart';
@@ -27,11 +29,13 @@ class _MembersScreenState extends State<MembersScreen> {
 
   bool initialLoadingStatus = false;
 
-  _onSelectPopUpMenu(String value) {
+  _onSelectPopUpMenu(String value) async {
     if (value == 'Signout') {
       // userController.removeCurrentUserData();
-      FirebaseAuth.instance.signOut();
+      await FirebaseAuth.instance.signOut();
       userController.removeCurrentUserData();
+      Get.to(const AuthScreen());
+      // Get.to(page);
     }
     if (value == 'DeleteAccount') {
       Navigator.of(context).push(
@@ -126,6 +130,10 @@ class _MembersScreenState extends State<MembersScreen> {
           ],
         ),
         body: Obx(() {
+          // if (FirebaseAuth.instance.currentUser == null) {
+          //   return;
+          // }
+
           if (statusController.isLoading.value ||
               userController.currentUserData.isEmpty) {
             // authController.isSignUpStatus.value

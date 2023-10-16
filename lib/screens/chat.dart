@@ -38,6 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
     userUid = firebaseUtils.currentUserUid;
     // groupTitle = widget.groupTitle;
     setupPushNotification();
+    Util().updateReadByInMessageCollection(widget.groupData['id']);
   }
 
   void setupPushNotification() async {
@@ -107,7 +108,7 @@ class _ChatScreenState extends State<ChatScreen> {
           body: Column(
             children: [
               // Text(widget.groupId),
-              Expanded(child: ChatMessages(groupId: widget.groupData['id'])),
+              Expanded(child: ChatMessages(groupData: widget.groupData)),
               NewMessage(
                 // groupId: widget.groupData,
                 groupData: widget.groupData,

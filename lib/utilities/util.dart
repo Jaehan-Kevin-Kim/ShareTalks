@@ -125,40 +125,6 @@ class Util {
     // return groupId;
   }
 
-  // Future<String> createGroup(List<dynamic> usersUids, String groupTitle) async {
-  //   try {
-  //     final createdGroup = await firebaseUtils.groupsCollection.add({
-  //       'title': groupTitle,
-  //       'members': usersUids,
-  //       'createdAt': Timestamp.now(),
-  //       'recentMessage': {},
-  //       'type': usersUids.length == 2
-  //           ? 1
-  //           : 2, // if other user's uid's length = 1 ? individual Chat : group Chat
-  //     });
-
-  //     // 2-1-2-3. Add groupId into user's collection group field
-  //     for (final userUId in usersUids) {
-  //       await firebaseUtils.usersDoc(userUId).update({
-  //         'group': FieldValue.arrayUnion([createdGroup.id])
-  //       });
-  //     }
-
-  //     return createdGroup.id;
-  //     // return groupId;
-  //   } on FirebaseException catch (error) {
-  //     rootScaffoldMessengerKey.currentState!.clearSnackBars();
-  //     rootScaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
-  //       content: Text(error.message ?? 'Authentication failed'),
-  //     ));
-  //     // ScaffoldMessenger.of(context).clearSnackBars();
-  //     // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-  //     //   content: Text(error.message ?? 'Authentication failed'),
-  //     // ));
-  //     return '';
-  //   }
-  // }
-
   Future<bool> isGroupEmpty(List<dynamic> userUids) async {
     final userUid = firebaseUtils.currentUserUid;
     final usersData = await firebaseUtils.usersData(userUid);
@@ -173,7 +139,7 @@ class Util {
     String? messageText,
     String? imageUrl,
   }) async {
-    final myUserData = userController.currentUserData;
+    final currentUserData = userController.currentUserData;
 
     final newChat = await FirebaseFirestore.instance
         .collection('messages')
@@ -183,9 +149,10 @@ class Util {
       'createdAt': Timestamp.now(),
       'text': messageText ?? '',
       'image': imageUrl ?? '',
+      'readBy': [currentUserData['id']],
       'senderId': firebaseUtils.currentUserUid,
-      'senderImage': myUserData['image_url'],
-      'senderName': myUserData['username'],
+      'senderImage': currentUserData['image_url'],
+      'senderName': currentUserData['username'],
     });
 
 // 아래공통
@@ -204,6 +171,7 @@ class Util {
         'sentAt': newChatData.data()!['createdAt'],
         'sendBy': newChatData.data()!['senderId'],
         'chatId': newChatData.id,
+        'readBy': [currentUserData['id']],
       }
     });
   }
@@ -251,6 +219,42 @@ class Util {
       final imageUrl = await storageRef.getDownloadURL();
       // return imageUrl;
       await sendChatCommon(groupId: groupId, imageUrl: imageUrl);
+    }
+  }
+
+  /* logic to update read by array in messages collection*/
+  Future<void> updateReadByInMessageCollection(String groupId) async {
+    final currentUserData =
+        await firebaseUtils.usersData(firebaseUtils.currentUserUid);
+    final chatCollection = firebaseUtils
+        .chatsCollection(groupId)
+        .orderBy('createdAt', descending: true)
+        .limit(100);
+
+    final chatCollectionDataList = await chatCollection.get();
+    for (final chatDataDoc in chatCollectionDataList.docs) {
+      final id = chatDataDoc.id;
+      final data = chatDataDoc.data();
+      // if (data['readby']) print(data);
+      // data['readby'].contains(currentUserData['id']) ? return :
+
+      // if chat > 'readBy' doesn't have currentUserId, then it should be added
+
+      if (!data['readBy'].contains(currentUserData!['id'])) {
+        // await chatDataDoc.data().update(key, (value) => null)
+        await firebaseUtils.chatsCollection(groupId).doc(id).update({
+          'readBy': FieldValue.arrayUnion([currentUserData['id']])
+        });
+
+        // update current userid into readby array
+      }
+    }
+    // Also need to update groupData's recentMessage readby only when recentMessage map has value
+    final groupData = await firebaseUtils.groupsData(groupId);
+    if (groupData!['recentMessage'].isNotEmpty) {
+      await firebaseUtils.groupsDoc(groupId).update({
+        'recentMessage.readBy': FieldValue.arrayUnion([currentUserData!['id']])
+      });
     }
   }
 

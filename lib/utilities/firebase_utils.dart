@@ -70,4 +70,9 @@ class FirebaseUtils {
     final messagesGetResult = await messagesGet(groupId);
     return messagesGetResult.data();
   }
+
+  //// Chat Collection
+  CollectionReference<Map<String, dynamic>> chatsCollection(String groupId) {
+    return messagesDoc(groupId).collection('chats');
+  }
 }

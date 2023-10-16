@@ -1,13 +1,18 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:share_talks/screens/chat.dart';
+import 'package:share_talks/utilities/firebase_utils.dart';
+import 'package:share_talks/utilities/util.dart';
 import 'package:share_talks/widgets/message_bubble.dart';
 
 final fBF = FirebaseFirestore.instance;
+final firebaseUtils = FirebaseUtils();
 
 class ChatMessages extends StatefulWidget {
-  final String groupId;
-  const ChatMessages({super.key, required this.groupId});
+  final Map<String, dynamic> groupData;
+  const ChatMessages({super.key, required this.groupData});
 
   @override
   State<ChatMessages> createState() => _ChatMessagesState();
@@ -18,6 +23,24 @@ class _ChatMessagesState extends State<ChatMessages> {
   // 1. messages 라는 collection이 있는 지 확인
 
   // message라는 collection이 없는 상태에서 groupId로 찾을 수 있는 logic이 가능한지 확인 해 보기
+
+  // @override
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  // }
+  final StreamController _streamController = StreamController();
+
+  @override
+  void didUpdateWidget(covariant ChatMessages oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    updateReadBy();
+  }
+
+  void updateReadBy() async {
+    await Util().updateReadByInMessageCollection(widget.groupData['id']);
+  }
 
   /////////////////////
   ///
@@ -43,7 +66,7 @@ class _ChatMessagesState extends State<ChatMessages> {
       // stream: FirebaseFirestore.instance.collection('chat').snapshots(),
       stream: FirebaseFirestore.instance
           .collection('messages')
-          .doc(widget.groupId)
+          .doc(widget.groupData['id'])
           .collection('chats')
           .orderBy('createdAt', descending: true)
           .snapshots(),
@@ -65,6 +88,8 @@ class _ChatMessagesState extends State<ChatMessages> {
             child: Text("Something went wrong"),
           );
         }
+
+        updateReadBy();
 
         final loadedMessage = chatSnapshot.data!.docs;
 
@@ -107,6 +132,11 @@ class _ChatMessagesState extends State<ChatMessages> {
                 chatMessage['createdAt'].toDate().day !=
                     nextChatMessageCreatedDate.day;
 
+            final int notReadMemberNumbers =
+                widget.groupData['members'].length -
+                    chatMessage['readBy'].length;
+            print(notReadMemberNumbers);
+
             return Column(
               children: [
                 if (showDateDivider)
@@ -136,6 +166,7 @@ class _ChatMessagesState extends State<ChatMessages> {
                       createdAt: chatMessage['createdAt'],
                       message: chatMessage['text'],
                       chatImage: chatMessage['image'],
+                      notReadMemberNumber: notReadMemberNumbers,
                       isMe:
                           firebaseUtils.currentUserUid == currentMessageUserId),
                 if (!nextUserIsSame)
@@ -143,6 +174,7 @@ class _ChatMessagesState extends State<ChatMessages> {
                     createdAt: chatMessage['createdAt'],
                     message: chatMessage['text'],
                     chatImage: chatMessage['image'],
+                    notReadMemberNumber: notReadMemberNumbers,
                     isMe: firebaseUtils.currentUserUid == currentMessageUserId,
                     userId: chatMessage['senderId'],
                     userImage: chatMessage['senderImage'],

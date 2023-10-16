@@ -65,11 +65,54 @@ class _ChatListItemState extends State<ChatListItem> {
         .then((value) => setState(() {}));
   }
 
+  String? get readByBadgeCount {
+    if (widget.groupData['recentMessage'].isEmpty) {
+      return null;
+    }
+    if (widget.groupData['recentMessage']['readBy']
+        .contains(firebaseUtils.currentUserUid)) {
+      return null;
+    } else {
+      return (widget.groupData['members'].length -
+              widget.groupData['recentMessage']['readBy'].length)
+          .toString();
+    }
+  }
+
+  String? get lastSentMessageDataTime {
+    final lastSentMessage =
+        widget.groupData['recentMessage']?['sentAt']?.toDate();
+
+    String? lastSentMessageString;
+
+    if (lastSentMessage != null) {
+      if (DateFormat.Md().format(lastSentMessage) ==
+          DateFormat.Md().format(DateTime.now())) {
+        lastSentMessageString = DateFormat.jm().format(lastSentMessage);
+      } else {
+        lastSentMessageString = DateFormat.Md().format(lastSentMessage);
+      }
+    } else {
+      lastSentMessageString = null;
+    }
+
+    return lastSentMessageString;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final lastSentMessageDateTime =
-        widget.groupData['recentMessage']?['sentAt']?.toDate();
+    // final lastSentMessageDateTime =
+    //     widget.groupData['recentMessage']?['sentAt']?.toDate();
+
     // 여기서 logic 정하기 (groupChat avatar image), chat list title
+    // int readByBadgeCount;
+    // if (widget.groupData['recentMessage.readBy']
+    //     .contains(firebaseUtils.currentUserUid)) {
+    //   readByBadgeCount = 0;
+    // } else {
+    //   readByBadgeCount = widget.groupData['members'].length -
+    //       widget.groupData['recentMessage.readBy'].length;
+    // }
 
     // return FutureBuilder(
     //   future: getGroupData(),
@@ -117,12 +160,36 @@ class _ChatListItemState extends State<ChatListItem> {
       onTap: () {
         _onTapChatList(widget.groupData, widget.chatTitle);
       },
-      trailing: lastSentMessageDateTime != null
-          ? Text(DateFormat.Md().format(lastSentMessageDateTime) ==
-                  DateFormat.Md().format(DateTime.now())
-              ? DateFormat.jm().format(lastSentMessageDateTime)
-              : DateFormat.Md().format(lastSentMessageDateTime))
+
+      trailing: readByBadgeCount != null || lastSentMessageDataTime != null
+          ? Wrap(
+              // alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.end,
+              direction: Axis.vertical,
+              children: [
+                if (lastSentMessageDataTime != null)
+                  Text(lastSentMessageDataTime!),
+                const SizedBox(
+                  height: 5,
+                ),
+                if (readByBadgeCount != null)
+                  Badge(
+                    // alignment: Alignment.centerRight,
+                    label: Text(
+                      readByBadgeCount!,
+                      // badgeContent:
+                    ),
+                  ),
+              ],
+            )
           : null,
+      ///////////////
+      // trailing: lastSentMessageDateTime != null
+      //     ? Text(DateFormat.Md().format(lastSentMessageDateTime) ==
+      //             DateFormat.Md().format(DateTime.now())
+      //         ? DateFormat.jm().format(lastSentMessageDateTime)
+      //         : DateFormat.Md().format(lastSentMessageDateTime))
+      //     : null,
       leading: CircleAvatar(
         radius: 30,
         foregroundImage: widget.avatarImage,

@@ -15,6 +15,7 @@ class MessageBubble extends StatelessWidget {
       required this.message,
       required this.isMe,
       required this.userId,
+      required this.notReadMemberNumber,
       required this.chatImage,
       required this.createdAt})
       : isFirstInSequence = true;
@@ -23,6 +24,7 @@ class MessageBubble extends StatelessWidget {
       {super.key,
       required this.message,
       required this.isMe,
+      required this.notReadMemberNumber,
       required this.chatImage,
       required this.createdAt})
       : isFirstInSequence = false,
@@ -39,6 +41,7 @@ class MessageBubble extends StatelessWidget {
   final String message;
   final String chatImage;
   final String? userId;
+  final int notReadMemberNumber;
 
   final bool isMe;
 
@@ -123,7 +126,14 @@ class MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     Widget dateFormatWidget = Column(
+      crossAxisAlignment:
+          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
+        if (notReadMemberNumber > 0)
+          Text(
+            notReadMemberNumber.toString(),
+            style: const TextStyle(fontSize: 10, color: Colors.redAccent),
+          ),
         Text(
           formatter.format(createdAt.toDate()),
           style: const TextStyle(fontSize: 10),

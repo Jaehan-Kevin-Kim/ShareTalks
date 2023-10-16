@@ -124,7 +124,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
         title: const Text('Chats'),
         actions: [
           IconButton(
-              onPressed: _createChatGroup, icon: const Icon(Icons.maps_ugc_rounded))
+              onPressed: _createChatGroup,
+              icon: const Icon(Icons.maps_ugc_rounded))
         ],
       ),
       body: StreamBuilder(
@@ -179,6 +180,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     return ChatListItem(
                       groupData: groups[index].data(),
                       // groupId: newGroupsData[index].data()['id'],
+
                       avatarImage: newGroupsData[index]['avatarImage'],
                       chatTitle: newGroupsData[index]['chatTitle'],
                     );

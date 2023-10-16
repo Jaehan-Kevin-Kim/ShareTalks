@@ -1,16 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:share_talks/controller/user_controller.dart';
 import 'package:share_talks/screens/auth.dart';
 import 'package:share_talks/screens/navigator.dart';
-import 'package:share_talks/screens/notification.dart';
-import 'package:share_talks/services/firebase_notification_service.dart';
-import 'package:share_talks/services/notification_service.dart';
 import 'package:share_talks/widgets/firebase_options.dart';
 
 // FlutterLocalNotificationsPlugin 인스턴스 생성

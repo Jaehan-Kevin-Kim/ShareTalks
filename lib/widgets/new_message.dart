@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_talks/controller/gallery_controller.dart';
 import 'package:share_talks/utilities/image_util.dart';
+import 'package:share_talks/utilities/util.dart';
 import 'package:share_talks/widgets/custom_alert_dialog.dart';
 import 'package:share_talks/widgets/full_screen_image.dart';
 import 'package:share_talks/widgets/gallery_images.dart';
@@ -140,60 +141,12 @@ class _NewMessageState extends State<NewMessage> {
   }
 
   void onSendImage() async {
-    final authUser = FirebaseAuth.instance.currentUser!;
-    final userData = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(authUser.uid)
-        .get();
-
     setState(() {
       isSending = true;
     });
 
-    final storageRef = FirebaseStorage.instance
-        .ref()
-        .child('chat_images')
-        .child(widget.groupData['id'])
-        .child('${uuid.v4()}.jpg');
-    // await storageRef.
-    await storageRef.putFile(_selectedImage!);
-    final imageUrl = await storageRef.getDownloadURL();
-
-    // 1. Create a message by using groupId
-    final newChat = await FirebaseFirestore.instance
-        .collection('messages')
-        .doc(widget.groupData['id'])
-        .collection('chats')
-        .add({
-      'createdAt': Timestamp.now(),
-      'text': '',
-      'image': imageUrl,
-      'senderId': authUser.uid,
-      'senderImage': userData.data()!['image_url'],
-      'senderName': userData.data()!['username'],
-    });
-
-    final newChatData = await FirebaseFirestore.instance
-        .collection('messages')
-        .doc(widget.groupData['id'])
-        .collection('chats')
-        .doc(newChat.id)
-        .get();
-
-    /// 2. After new chat creation, update recentMessage in group collection
-    await FirebaseFirestore.instance
-        .collection('groups')
-        .doc(widget.groupData['id'])
-        .update({
-      'updatedAt': newChatData.data()!['createdAt'],
-      'recentMessage': {
-        'chatText': newChatData.data()!['text'],
-        'chatImage': newChatData.data()!['image'],
-        'sentAt': newChatData.data()!['createdAt'],
-        'sendBy': newChatData.data()!['senderId'],
-        'chatId': newChatData.id,
-      }
-    });
+    await Util().sendSingleImageChat(
+        groupId: widget.groupData['id'], singleImageFile: _selectedImage);
 
     setState(() {
       isSending = false;
@@ -204,72 +157,10 @@ class _NewMessageState extends State<NewMessage> {
 
   void onSendImages(BuildContext ctx) async {
     try {
-      final authUser = FirebaseAuth.instance.currentUser!;
-      final userData = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(authUser.uid)
-          .get();
-
-      final selectedImages = galleryController.selectedImagesWithIndexes
-          .map((imageWithIndex) => imageWithIndex['image']);
-
       setState(() {
         isSending = true;
       });
-
-      // Navigator.of(ctx).pop();
-
-      for (AssetEntity selectedImage in selectedImages) {
-        // final image = AssetEntityImageProvider(selectedImage);
-        final File? imageFile = await selectedImage.file;
-
-        //  ByteData data = await rootBundle.loadBuffer(key)
-
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('chat_images')
-            .child(widget.groupData['id'])
-            .child('${uuid.v4()}.jpg');
-        // await storageRef.
-        await storageRef.putFile(imageFile!);
-        final imageUrl = await storageRef.getDownloadURL();
-
-        // 1. Create a message by using groupId
-        final newChat = await FirebaseFirestore.instance
-            .collection('messages')
-            .doc(widget.groupData['id'])
-            .collection('chats')
-            .add({
-          'createdAt': Timestamp.now(),
-          'text': '',
-          'image': imageUrl,
-          'senderId': authUser.uid,
-          'senderImage': userData.data()!['image_url'],
-          'senderName': userData.data()!['username'],
-        });
-
-        final newChatData = await FirebaseFirestore.instance
-            .collection('messages')
-            .doc(widget.groupData['id'])
-            .collection('chats')
-            .doc(newChat.id)
-            .get();
-
-        /// 2. After new chat creation, update recentMessage in group collection
-        await FirebaseFirestore.instance
-            .collection('groups')
-            .doc(widget.groupData['id'])
-            .update({
-          'updatedAt': newChatData.data()!['createdAt'],
-          'recentMessage': {
-            'chatText': newChatData.data()!['text'],
-            'chatImage': newChatData.data()!['image'],
-            'sentAt': newChatData.data()!['createdAt'],
-            'sendBy': newChatData.data()!['senderId'],
-            'chatId': newChatData.id,
-          }
-        });
-      }
+      await Util().sendMultipleImagesChat(groupId: widget.groupData['id']);
       setState(() {
         isSending = false;
       });
@@ -301,55 +192,16 @@ class _NewMessageState extends State<NewMessage> {
       return;
     }
 
-    ///// Store into firebase
-
     _messageController.clear();
     FocusScope.of(context).unfocus();
 
     try {
-      final authUser = FirebaseAuth.instance.currentUser!;
-      final userData = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(authUser.uid)
-          .get();
-
       setState(() {
         isSending = true;
       });
       // 1. Create a message by using groupId
-      final newChat = await FirebaseFirestore.instance
-          .collection('messages')
-          .doc(widget.groupData['id'])
-          .collection('chats')
-          .add({
-        'createdAt': Timestamp.now(),
-        'text': typedMessage,
-        'image': '',
-        'senderId': authUser.uid,
-        'senderImage': userData.data()!['image_url'],
-        'senderName': userData.data()!['username'],
-      });
-
-      final newChatData = await FirebaseFirestore.instance
-          .collection('messages')
-          .doc(widget.groupData['id'])
-          .collection('chats')
-          .doc(newChat.id)
-          .get();
-
-      /// 2. After new chat creation, update recentMessage in group collection
-      await FirebaseFirestore.instance
-          .collection('groups')
-          .doc(widget.groupData['id'])
-          .update({
-        'updatedAt': newChatData.data()!['createdAt'],
-        'recentMessage': {
-          'chatText': newChatData.data()!['text'],
-          'sentAt': newChatData.data()!['createdAt'],
-          'sendBy': newChatData.data()!['senderId'],
-          'chatId': newChatData.id,
-        }
-      });
+      await Util().sendTextChat(
+          groupId: widget.groupData['id'], typedMessage: typedMessage);
       setState(() {
         isSending = false;
       });
@@ -364,8 +216,6 @@ class _NewMessageState extends State<NewMessage> {
         isSending = false;
       });
     }
-
-    ////////////////////////////////////
   }
 
   void showImageGallery() {
@@ -426,8 +276,6 @@ class _NewMessageState extends State<NewMessage> {
                           ),
                         ),
                       ),
-                    // if (isReachedToLimitedNumberOfImages.value)
-                    //   const CustomAlertDialog()
                   ]),
                 ),
                 Container(
@@ -453,20 +301,7 @@ class _NewMessageState extends State<NewMessage> {
             );
           });
         }).then((value) => galleryController.emptyIndexList());
-    // });
   }
-
-  // Future<void> _pickImages() async {
-  //   final List<XFile> pickedImages = await ImagePicker().pickMultiImage();
-
-  //   if (pickedImages.isNotEmpty) {
-  //     // 선택된 이미지를 처리하는 로직을 추가하십시오.
-  //     for (final image in pickedImages) {
-  //       // 각 이미지에 대한 작업을 수행하십시오.
-  //       print(image.path);
-  //     }
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -484,42 +319,23 @@ class _NewMessageState extends State<NewMessage> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      // setState(() {
-                      //   isCameraSelected = false;
-                      //   isPhotoSelected = true;
-                      // });
                       isCameraSelected = false;
                       _loadImage();
                       // _getImage(isCameraSelected);
                     },
                     icon: const Icon(Icons.image),
                   ),
-                  // icon: Icon(isPhotoSelected
-                  //     ? Icons.image
-                  //     : Icons.image_outlined)),
-                  // SizedBox(
-                  //   width: 5,
-                  // ),
                   IconButton(
                     onPressed: () {
-                      // setState(() {
-                      //   isCameraSelected = true;
-                      //   isPhotoSelected = false;
-                      // });
                       isCameraSelected = true;
                       _getImage(isCameraSelected);
                     },
                     icon: const Icon(Icons.camera_alt),
                   )
-                  // icon: Icon(isCameraSelected
-                  //     ? Icons.camera_alt
-                  //     : Icons.camera_alt_outlined)),
                 ],
               ),
             ),
           Expanded(
-            // child: Hero(
-            //   tag: widget.groupData['id'],
             child: TextField(
               decoration: const InputDecoration(labelText: 'Send a message...'),
               autocorrect: true,
@@ -536,7 +352,8 @@ class _NewMessageState extends State<NewMessage> {
                   icon: Icon(
                     Icons.send,
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  )),
+                  ),
+                ),
         ],
       ),
     );
