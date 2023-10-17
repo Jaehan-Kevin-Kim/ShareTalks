@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_talks/controller/auth_controller.dart';
@@ -11,6 +12,7 @@ import 'package:share_talks/utilities/firebase_utils.dart';
 import 'package:share_talks/widgets/member_item.dart';
 
 import '../controller/user_controller.dart';
+import '../utilities/image_util.dart';
 
 final firebaseUtils = FirebaseUtils();
 
@@ -172,6 +174,19 @@ class _MembersScreenState extends State<MembersScreen> {
 
             return Column(
               children: [
+                // TextButton(
+                //   onPressed: () async {
+                //     final image = await ImageUtil.selectImage(false);
+                //     final storageRef = FirebaseStorage.instance
+                //         .ref()
+                //         .child('user_default_image.jpg');
+
+                //     await storageRef.putFile(image!);
+                //     final imageUrl = await storageRef.getDownloadURL();
+                //     print(imageUrl);
+                //   },
+                //   child: Text('click'),
+                // ),
                 MemberItem(
                   userData: me,
                 ),

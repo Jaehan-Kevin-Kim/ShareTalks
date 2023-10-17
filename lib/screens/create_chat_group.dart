@@ -115,10 +115,7 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
 
       // 여기서 selectedImage를 firestore에 저장하는 logic 작성 //
       final newId = uuid.v4();
-      // _selectedImage = _selectedImage;
-      // File image = await File('assets/images/group_default_image.png').create();
 
-      // _selectedImage.isAbsolute = true;
       String? imageUrl;
       if (_selectedImage != null) {
         final storageRef = FirebaseStorage.instance

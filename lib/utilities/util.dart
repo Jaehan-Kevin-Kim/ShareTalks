@@ -39,8 +39,15 @@ class Util {
         .child('user_images')
         .child('$userUid.jpg');
 
-    await storageRef.putFile(selectedImage!);
-    final imageUrl = await storageRef.getDownloadURL();
+    String imageUrl;
+
+    if (selectedImage == null) {
+      imageUrl =
+          'https://firebasestorage.googleapis.com/v0/b/share-talks-c90cb.appspot.com/o/user_default_image.jpg?alt=media&token=6ad3ee62-07fd-4743-a3b3-8670f1e6fd97';
+    } else {
+      await storageRef.putFile(selectedImage);
+      imageUrl = await storageRef.getDownloadURL();
+    }
 
     await FirebaseFirestore.instance.collection('users').doc(userUid).set({
       'id': userUid,

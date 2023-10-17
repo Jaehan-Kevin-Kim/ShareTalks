@@ -81,7 +81,7 @@ class _UserImagePickerState extends State<UserImagePicker> {
             // onPressed: _takePicture,
             onPressed: cameraOption,
             icon: const Icon(Icons.photo),
-            label: const Text('Add a photo'))
+            label: const Text('Add a profile photo'))
       ],
     );
   }

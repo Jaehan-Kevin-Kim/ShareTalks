@@ -99,10 +99,6 @@ class _AuthScreenState extends State<AuthScreen> {
                   borderRadius: BorderRadius.circular(20),
                   child: Image.asset('assets/images/logo.png'),
                 ),
-                // decoration:
-
-                //     BoxDecoration(borderRadius: BorderRadius.circular(200)),
-                // child: Image.asset('assets/images/logo.png'),
               ),
               Card(
                 margin: const EdgeInsets.only(
