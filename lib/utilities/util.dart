@@ -27,8 +27,21 @@ class Util {
   UserController userController = Get.put(UserController());
   GalleryController galleryController = Get.put(GalleryController());
 
-  Future<void> signUpUser(
-      String userUid, String username, String email, String imageUrl) async {
+  Future<void> createUser(
+      {required String userUid,
+      required String email,
+      required String password,
+      required String username,
+      String? statusMessage,
+      File? selectedImage}) async {
+    final storageRef = FirebaseStorage.instance
+        .ref()
+        .child('user_images')
+        .child('$userUid.jpg');
+
+    await storageRef.putFile(selectedImage!);
+    final imageUrl = await storageRef.getDownloadURL();
+
     await FirebaseFirestore.instance.collection('users').doc(userUid).set({
       'id': userUid,
       'username': username,
@@ -37,9 +50,18 @@ class Util {
       'group': [],
       'favorite': [],
       'active': true,
+      'statusMessage': statusMessage ?? '',
       'createdAt': Timestamp.now(),
       'updatedAt': Timestamp.now(),
     });
+
+    await userController.updateCurrentUserData(userUid);
+  }
+
+  Future<void> deleteUser() async {
+    await firebaseUtils
+        .usersDoc(firebaseUtils.currentUserUid)
+        .update({'active': false, 'updatedAt': Timestamp.now()});
   }
 
   Future<Map<String, dynamic>> createSelfChatGroup(

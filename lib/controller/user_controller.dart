@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:share_talks/controller/status_controller.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 
 final firebaseUtils = FirebaseUtils();
@@ -13,6 +14,7 @@ class UserController extends GetxController {
   RxList<QueryDocumentSnapshot<Map<String, dynamic>>> activeUsers =
       RxList<QueryDocumentSnapshot<Map<String, dynamic>>>();
   final firestoreInstance = FirebaseFirestore.instance;
+  StatusController statusController = Get.put(StatusController());
 
   @override
   void onInit() {
@@ -27,6 +29,14 @@ class UserController extends GetxController {
         .listen((querySnapshot) {
       activeUsers.assignAll(querySnapshot.docs);
     });
+
+    if (FirebaseAuth.instance.currentUser != null) {
+      updateCurrentUserData(FirebaseAuth.instance.currentUser!.uid);
+    }
+    // FirebaseAuth.instance.userChanges().listen((user) {
+    //   print(user);
+    //   return null;
+    // });
   }
 
   // Code to update user's data
@@ -43,6 +53,8 @@ class UserController extends GetxController {
   }
 
   Future<void> updateCurrentUserData(String userUid) async {
+    statusController.updateLoadingStatus(true);
+
     final usersGet =
         await FirebaseFirestore.instance.collection('users').doc(userUid).get();
     print(usersGet.data());
@@ -52,6 +64,7 @@ class UserController extends GetxController {
     // currentUserData.value =
     //     await FirebaseFirestore.instance.collection('user').usersData(userUid);
     print(currentUserData);
+    statusController.updateLoadingStatus(false);
     // Get.to(() => const MyApp());
   }
 

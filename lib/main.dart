@@ -32,7 +32,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final UserController controller = Get.put(UserController());
+    // final AuthController authController = Get.put(AuthController());
+
+    final UserController userController = Get.put(UserController());
     return GetMaterialApp(
       scaffoldMessengerKey: rootScaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
@@ -43,20 +45,20 @@ class MyApp extends StatelessWidget {
             seedColor: const Color.fromARGB(255, 63, 17, 177)),
       ),
       navigatorKey: navigatorKey,
-      // routes: {
-      //   NotificationScreen.route: (context) => const NotificationScreen()
-      // },
-      // home: ChatListScreen(),
+      // home: Obx(() {
+      //   final user = authController.currentUser;
+      //   if (user.value == null) {
+      //     return const AuthScreen();
+      //   } else {
+      //     return const NavigatorScreen();
+      //   }
+      // })
+
       home: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
+        stream: FirebaseAuth.instance.userChanges(),
         builder: ((context, snapshot) {
-          // if (snapshot.connectionState == ConnectionState.waiting) {
-          //   return const SplashScreen();
-          // }
           if (snapshot.hasData) {
-            controller.updateCurrentUserData(snapshot.data!.uid);
-            // return const ChatScreen();
-            // getUserToken();
+            userController.updateCurrentUserData(snapshot.data!.uid);
             return const NavigatorScreen();
           } else {
             return const AuthScreen();

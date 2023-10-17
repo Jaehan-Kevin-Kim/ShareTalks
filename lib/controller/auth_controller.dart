@@ -1,44 +1,48 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 import 'package:share_talks/controller/status_controller.dart';
 import 'package:share_talks/controller/user_controller.dart';
+import 'package:share_talks/main.dart';
+import 'package:share_talks/screens/auth.dart';
+import 'package:share_talks/utilities/util.dart';
+
+import '../screens/navigator.dart';
 
 class AuthController extends GetxController {
+  static AuthController instance = Get.find();
+
   UserController userController = Get.put(UserController());
-  late Rx<User?> _user;
+  StatusController statusController = Get.put(StatusController());
+
+  late Rx<User?> currentUser;
   FirebaseAuth authentication = FirebaseAuth.instance;
 
-  // var isSignUpStatus = false.obs;
-  // StatusController statusController = Get.put(StatusController());
-
-  // void changeSignUpStatus(bool status) {
-  //   isSignUpStatus.value = status;
-  // }
-
-  // void runLoadingSpinner() {
-  //   statusController.updateLoadingStatus(true);
-  //   Future.delayed(const Duration(seconds: 5));
-  //   // isSignUpStatus.value = false;
-  //   statusController.updateLoadingStatus(false);
-  // }
-  @override
-  void onReady() {
-    super.onReady();
-    // FirebaseAuth.instance.userChanges().li
-    _user = Rx<User?>(authentication.currentUser);
-    _user.bindStream(authentication.userChanges());
-    ever(_user, (callback) => _moveToPage);
+  Future<void> login(String email, String password) async {
+    final userCredential = await authentication.signInWithEmailAndPassword(
+        email: email, password: password);
+    await userController.updateCurrentUserData(userCredential.user!.uid);
   }
 
-  _moveToPage(User? user) {
-    if (user == null) {
-      Get.offAll(() => LoginPage());
-    } else {
-      Get.offAll(() => WelcomePage());
-    }
+  Future<UserCredential> signUp({
+    required String email,
+    required String password,
+  }) async {
+    final userCredential = await authentication.createUserWithEmailAndPassword(
+        email: email, password: password);
+
+    return userCredential;
   }
 
-  Future<void> loginUser(String email, String password) async {
-    await userController.updateCurrentUserData(userUid);
+  Future<void> deleteAccount() async {
+    await authentication.currentUser!.delete();
+  }
+
+  Future<void> signOut() async {
+    userController.removeCurrentUserData();
+    await authentication.signOut();
+    Get.offAll(() => const AuthScreen());
   }
 }

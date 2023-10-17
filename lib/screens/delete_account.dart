@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_talks/controller/auth_controller.dart';
 import 'package:share_talks/controller/user_controller.dart';
 import 'package:share_talks/screens/auth.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
+import 'package:share_talks/utilities/util.dart';
 
 final firebaseUtils = FirebaseUtils();
 
@@ -18,7 +21,9 @@ class DeleteAccountScreen extends StatefulWidget {
 class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   final passwordController = TextEditingController();
   final UserController userController = Get.find<UserController>();
+  final AuthController authController = Get.find();
 
+  bool isLoading = false;
   bool passwordVisible = false;
   bool validatorActive = false;
   String validatorMessage = '';
@@ -84,9 +89,15 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Are you sure?'),
+        backgroundColor: Theme.of(context).colorScheme.onInverseSurface,
+        title: const Text(
+          'Are you sure?',
+          // style: TextStyle(color: Colors.white),
+        ),
         content: const Text(
-            'Deleting this data will remove your account and you will no longer log in to the application! Are you sure you want to proceed?'),
+          'Deleting this data will remove your account and you will no longer log in to the application! Are you sure you want to proceed?',
+          // style: TextStyle(color: Colors.white),
+        ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context, 'Cancel'),
@@ -108,25 +119,27 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
 
   void _deleteUserAccount() async {
     try {
-      // await firebaseUtils.usersCollection
-      //     .doc(firebaseUtils.currentUserUid)
-      //     .delete();
-
-      final result = reAuthenticate();
-      await firebaseUtils
-          .usersDoc(firebaseUtils.currentUserUid)
-          .update({'active': false, 'updatedAt': Timestamp.now()});
+      // final result = reAuthenticate();
+      // await firebaseUtils
+      //     .usersDoc(firebaseUtils.currentUserUid)
+      //     .update({'active': false, 'updatedAt': Timestamp.now()});
+      setState(() {
+        isLoading = true;
+      });
+      await authController.login(
+          FirebaseAuth.instance.currentUser!.email!, passwordController.text);
+      await Util().deleteUser();
 
       // Also disable all groups having this user as a member
-      //
       // Finally remove user's id from all users having this user's id as their favorites.
 
-      await FirebaseAuth.instance.currentUser!.delete();
+      // await FirebaseAuth.instance.currentUser!.delete();
+      await authController.deleteAccount();
 
-      // FirebaseAuth.instance.
-      FirebaseAuth.instance.signOut();
-      userController.removeCurrentUserData();
-      returnToAuthScreen();
+      await authController.signOut();
+      // FirebaseAuth.instance.signOut();
+      // userController.removeCurrentUserData();
+      // returnToAuthScreen();
     } on FirebaseException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -183,54 +196,65 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
       appBar: AppBar(
         title: const Text("Delete Account"),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const Text(
-              "Why are you leaving us?",
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 40),
-            const Text(
-              "Please confirm your password before we let you go.",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              obscureText: !passwordVisible,
-              autocorrect: false,
-              decoration: InputDecoration(
-                  errorText: validatorActive ? validatorMessage : null,
-                  hintText: 'Password',
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        passwordVisible = !passwordVisible;
-                      });
-                    },
-                    icon: Icon(passwordVisible
-                        ? Icons.visibility_off
-                        : Icons.visibility),
-                  )),
-            ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 67,
-              child: ElevatedButton(
-                  onPressed: onClickContinue,
-                  child: const Text(
-                    'Continue',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                  )),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
             )
-            // Icon(Icons.)
-          ],
-        ),
-      ),
+          : Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  const Text(
+                    "Why are you leaving us?",
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 40),
+                  const Text(
+                    "Please confirm your password before we let you go.",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: !passwordVisible,
+                    autocorrect: false,
+                    decoration: InputDecoration(
+                        errorText: validatorActive ? validatorMessage : null,
+                        hintText: 'Password',
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              passwordVisible = !passwordVisible;
+                            });
+                          },
+                          icon: Icon(passwordVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                        )),
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 67,
+                    child: ElevatedButton(
+                        onPressed: onClickContinue,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer),
+                        child: const Text(
+                          'Continue',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              color: Colors.white),
+                        )),
+                  )
+                  // Icon(Icons.)
+                ],
+              ),
+            ),
     );
   }
 }

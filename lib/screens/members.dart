@@ -31,11 +31,10 @@ class _MembersScreenState extends State<MembersScreen> {
 
   _onSelectPopUpMenu(String value) async {
     if (value == 'Signout') {
+      // await FirebaseAuth.instance.signOut();
       // userController.removeCurrentUserData();
-      await FirebaseAuth.instance.signOut();
-      userController.removeCurrentUserData();
-      Get.to(const AuthScreen());
-      // Get.to(page);
+      // Get.to(const AuthScreen());
+      await authController.signOut();
     }
     if (value == 'DeleteAccount') {
       Navigator.of(context).push(
@@ -133,6 +132,7 @@ class _MembersScreenState extends State<MembersScreen> {
           // if (FirebaseAuth.instance.currentUser == null) {
           //   return;
           // }
+          final currentUser = userController.currentUserData;
 
           if (statusController.isLoading.value ||
               userController.currentUserData.isEmpty) {
@@ -153,7 +153,15 @@ class _MembersScreenState extends State<MembersScreen> {
                 .where((doc) => doc.id != firebaseUtils.currentUserUid)
                 .toList();
 
-            final me = userController.currentUserData;
+            Map<String, dynamic> me = currentUser;
+            // if (meDoc == null) {
+            //   return const Center(
+            //     child: CircularProgressIndicator(),
+            //   );
+            // } else {
+            //   me = meDoc.data();
+            // }
+
             // final me = userController.activeUsers
             //     .firstWhere((doc) => doc.id == firebaseUtils.currentUserUid)
             //     .data();

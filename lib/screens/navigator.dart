@@ -1,13 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:share_talks/screens/chat_list.dart';
 import 'package:share_talks/screens/members.dart';
 import 'package:share_talks/services/firebase_notification_service.dart';
-import 'package:share_talks/services/notification_service.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
-import 'package:share_talks/widgets/chat_list_item.dart';
 
 final fBF = FirebaseFirestore.instance;
 final firebaseUtils = FirebaseUtils();

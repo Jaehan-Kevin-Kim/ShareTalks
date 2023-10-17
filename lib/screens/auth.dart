@@ -8,9 +8,11 @@ import 'package:get/get.dart';
 import 'package:share_talks/controller/auth_controller.dart';
 import 'package:share_talks/controller/status_controller.dart';
 import 'package:share_talks/main.dart';
+import 'package:share_talks/utilities/util.dart';
 import 'package:share_talks/widgets/user_image_picker.dart';
 
 import '../controller/user_controller.dart';
+import 'navigator.dart';
 
 final _firebaseAuth = FirebaseAuth.instance;
 
@@ -48,57 +50,22 @@ class _AuthScreenState extends State<AuthScreen> {
 
       try {
         if (_isLoginMode) {
-          // final userCredentails =
-          final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
-              email: _enteredEmail, password: _enteredPassword);
-
-          userController.updateCurrentUserData(userCredential.user!.uid);
+          await authController.login(_enteredEmail, _enteredPassword);
         } else {
-          // authController.changeSignUpStatus(true);
-          statusController.updateLoadingStatus(true);
+          final userCredential = await authController.signUp(
+            email: _enteredEmail,
+            password: _enteredPassword,
+          );
 
-          if (_selectedImage == null) {
-            ScaffoldMessenger.of(context).clearSnackBars();
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text(
-              'Please add a photo!',
-              style: TextStyle(color: Colors.red),
-            )));
-            _isAuthenticating = false;
-            return;
-          }
-          final userCredential =
-              await _firebaseAuth.createUserWithEmailAndPassword(
-                  email: _enteredEmail, password: _enteredPassword);
-
-          final storageRef = FirebaseStorage.instance
-              .ref()
-              .child('user_images')
-              .child('${userCredential.user!.uid}.jpg');
-
-          await storageRef.putFile(_selectedImage!);
-          final imageUrl = await storageRef.getDownloadURL();
-          print(imageUrl);
-
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userCredential.user!.uid)
-              .set({
-            'id': userCredential.user!.uid,
-            'username': _enteredUsername,
-            'email': _enteredEmail,
-            'image_url': imageUrl,
-            'group': [],
-            'favorite': [],
-            'active': true,
-            'statusMessage': _enteredStatusMessage,
-            'createdAt': Timestamp.now(),
-            'updatedAt': Timestamp.now(),
-          });
-
-          userController.updateCurrentUserData(userCredential.user!.uid);
-          Get.back();
+          await Util().createUser(
+              userUid: userCredential.user!.uid,
+              email: _enteredEmail,
+              password: _enteredPassword,
+              username: _enteredUsername,
+              statusMessage: _enteredStatusMessage,
+              selectedImage: _selectedImage);
         }
+        Get.offAll(const NavigatorScreen());
       } on FirebaseAuthException catch (error) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
