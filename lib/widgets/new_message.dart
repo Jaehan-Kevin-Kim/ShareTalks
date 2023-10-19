@@ -1,17 +1,12 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_talks/controller/gallery_controller.dart';
 import 'package:share_talks/utilities/image_util.dart';
 import 'package:share_talks/utilities/util.dart';
-import 'package:share_talks/widgets/custom_alert_dialog.dart';
 import 'package:share_talks/widgets/full_screen_image.dart';
 import 'package:share_talks/widgets/gallery_images.dart';
 import 'package:share_talks/widgets/user_image_picker.dart';
@@ -293,8 +288,8 @@ class _NewMessageState extends State<NewMessage> {
                       _getImage(isCameraSelected);
                       // _pickImages();
                     },
-                    icon: Icon(Icons.grid_view),
-                    label: Text('View All'),
+                    icon: const Icon(Icons.grid_view),
+                    label: const Text('View All'),
                   ),
                 )
               ],

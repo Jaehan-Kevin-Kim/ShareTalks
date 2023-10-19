@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:share_talks/controller/user_controller.dart';
 import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
@@ -50,15 +49,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         .isNotEmpty;
     statusMessageController =
         TextEditingController(text: widget.userData['statusMessage']);
-    print('userController: ${userController.currentUserData.obs.value}');
   }
 
   onClickAvatarImage() {
-    // showDialog(
-    //     context: context,
-    //     builder: (ctx) => Dialog(
-    //           child: Image.network(widget.userData['image_url']),
-    //         ));
     Image image = Image.network(
       widget.userData['image_url'],
       fit: BoxFit.contain,
@@ -67,36 +60,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         isScrollControlled: true,
         context: context,
         builder: (ctx) => FullScreenImage(image: image));
-    // SafeArea(
-    //   child: Column(
-    //     children: [
-    //       Container(
-    //         height: 80,
-    //         alignment: Alignment.centerLeft,
-    //         color: Colors.black,
-    //         child: IconButton(
-    //           onPressed: () {
-    //             Navigator.of(ctx).pop();
-    //           },
-    //           iconSize: 25,
-    //           icon: const Icon(
-    //             Icons.close,
-    //             color: Colors.white,
-    //           ),
-    //         ),
-    //       ),
-    //       SizedBox(
-    //         width: MediaQuery.of(context).size.width,
-    //         height: MediaQuery.of(context).size.height - 160,
-    //         child: Image.network(
-    //           widget.userData['image_url'],
-    //           fit: BoxFit.contain,
-    //         ),
-    //       ),
-    //       Container(height: 80, color: Colors.black)
-    //     ],
-    //   ),
-    // ));
   }
 
   Future<void> onClickFavoriteButton() async {
@@ -104,10 +67,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       isFavorite = !isFavorite;
     });
 
-    // backend 요청은 추후 util이나 get controller로 다 빼버리기.
     if (isFavorite) {
-      // await firebaseUtils.usersDoc(currentUserData['id']).update({
-      //   'favorite': FieldValue.arrayUnion([widget.userData['id']])
       await userController.updateUser(currentUserData['id'], {
         'favorite': FieldValue.arrayUnion([widget.userData['id']])
       });
@@ -116,13 +76,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       await userController.updateUser(currentUserData['id'], {
         'favorite': FieldValue.arrayRemove([widget.userData['id']])
       });
-      // await firebaseUtils.usersDoc(currentUserData['id']).update({
-      //   'favorite': FieldValue.arrayRemove([widget.userData['id']])
-      // });
     }
     showScaffoldMessanger();
-
-    // 위 결과에 따라 Scaffold Messanger로 잘 등록되었다는 message를 띄울지 말지 고민 중.
   }
 
   void showScaffoldMessanger() {
@@ -177,12 +132,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   void sendToChatScreen(Map<String, dynamic> groupData, String groupTitle) {
-    // Get.to(ChatScreen(groupData: groupData, groupTitle: groupTitle));
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ChatScreen(
-          // groupTitle: _chatGroupNameController.text.trim(),
-          // groupId: groupId,
           groupData: groupData,
           groupTitle: groupTitle,
         ),
@@ -195,7 +147,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Update Status Message"),
+        title: const Text("Update Status Message"),
         titleTextStyle: TextStyle(
             fontSize: 18, color: Theme.of(context).colorScheme.primary),
         content: TextField(
@@ -216,7 +168,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 setState(() {
                   updatedStatusMessage = statusMessageController.text;
                 });
-                print(editedText);
                 Get.back();
               },
               child: const Text("Save"))

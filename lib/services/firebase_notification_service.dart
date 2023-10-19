@@ -15,9 +15,9 @@ final firebaseUtils = FirebaseUtils();
 final utils = Util();
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
-  print('Title: ${message.notification?.title}');
-  print('Body: ${message.notification?.body}');
-  print('Payload: ${message.data}');
+  // print('Title: ${message.notification?.title}');
+  // print('Body: ${message.notification?.body}');
+  // print('Payload: ${message.data}');
 }
 
 class FirebaseNotificationService {
@@ -118,34 +118,11 @@ class FirebaseNotificationService {
       return;
     }
     final token = await _firebaseMessaging.getToken();
-    print('token: $token');
-    // setState(() {
-    //   mToken = token;
-    //   print("My token is $mToken");
-    // });
+    // print('token: $token');
     saveToken(token!);
 
     initPushNotifications();
     initLocalNotifications();
-
-    // FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
-    // FirebaseMessaging.onMessage.listen((message) {
-    //   final notification = message.notification;
-    //   if (notification == null) return;
-    //   _localNotifications.show(
-    //     notification.hashCode,
-    //     notification.title,
-    //     notification.body,
-    //     NotificationDetails(
-    //       android: AndroidNotificationDetails(
-    //           _androidChannel.id, _androidChannel.name,
-    //           channelDescription: _androidChannel.description,
-    //           icon: '@drawable/logo'),
-    //     ),
-    //     payload: jsonEncode(message.toMap()),
-    //   );
-    // });
-    // _firebaseMessaging.sendMessage()
   }
 
   void saveToken(String token) async {

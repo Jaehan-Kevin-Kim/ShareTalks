@@ -1,14 +1,13 @@
+import 'dart:io';
+
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 import 'package:share_talks/utilities/image_util.dart';
 import 'package:share_talks/utilities/util.dart';
 import 'package:share_talks/widgets/camera_options.dart';
 import 'package:share_talks/widgets/create_chat_group_item.dart';
-import 'dart:io';
-
 import 'package:uuid/uuid.dart';
 
 final firebaseUtils = FirebaseUtils();
@@ -32,14 +31,12 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _loadedItems = _loadItems();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _chatGroupNameController.dispose();
     super.dispose();
   }
@@ -47,15 +44,11 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
   // Future<Object> _loadItems() async {
   Future<List<Map<String, dynamic>>> _loadItems() async {
     final usersCollectionGet = await firebaseUtils.usersCollection.get();
-    // if (usersCollectionGet.docs)
     final docs = usersCollectionGet.docs;
 
     var usersDocs = docs
         .map((doc) => firebaseUtils.usersDoc(doc.id))
         .where((doc) => doc.id != firebaseUtils.currentUserUid);
-    // final usersDatas = usersDocs.map((usersDoc) async {
-    //   return await firebaseUtils.usersData(usersDoc.id);
-    // });
 
     List<Map<String, dynamic>> usersDatas = [];
     for (final usersDoc in usersDocs) {
@@ -131,12 +124,6 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
       final newGroupData = await utils.createGroupChatGroup(groupMemberIds,
           _chatGroupNameController.text.trim(), imageUrl, newId);
 
-      // if (_selectedImage != null) {}
-
-      ///
-      ///
-      ///
-
       sendToChatScreen(newGroupData);
     } on FirebaseException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -153,8 +140,6 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => ChatScreen(
-              // groupTitle: _chatGroupNameController.text.trim(),
-              // groupId: groupId,
               groupData: groupData,
               groupTitle: groupData['title'],
             )));
@@ -177,31 +162,6 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
     // onSelectedImage(_selectedImage!);
   }
 
-/* 아래는 정상 동작 코드
-  void _getImage(bool isCameraSelected) async {
-    final imagePicker = ImagePicker();
-    final pickedImage = isCameraSelected
-        ? await imagePicker.pickImage(
-            source: ImageSource.camera, imageQuality: 50, maxWidth: 200
-            // source: ImageSource.camera, imageQuality: 50, maxWidth: 200
-            )
-        : await imagePicker.pickImage(
-            source: ImageSource.gallery, imageQuality: 50, maxWidth: 200);
-
-    if (pickedImage == null) {
-      _selectedImage = File('assets/images/group_default_image.png');
-      return;
-    }
-
-    setState(
-      () {
-        _selectedImage = File(pickedImage.path);
-      },
-    );
-    // onSelectedImage(_selectedImage!);
-  }
-   */
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -220,19 +180,10 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
         padding: const EdgeInsets.only(left: 16, right: 16),
         child: Column(
           children: [
-            // Expanded(
-            // child:
             Row(
               children: [
-                // const SizedBox(
-                //   width: 60,
-                // ),
-                // UserImagePicker(onSelectedImage: (image) {
-                //   _selectedImage = image;
-                // }),
                 GestureDetector(
                   onTap: () {
-                    print('click');
                     showModalBottomSheet(
                         context: context,
                         builder: (BuildContext context) {
@@ -249,11 +200,6 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
                           ? const AssetImage(
                               'assets/images/group_default_image.png')
                           : FileImage(_selectedImage!) as ImageProvider,
-                      // foregroundImage: _selectedImage == null
-                      //     ? AssetImage('assets/images/group_default_image.png')
-                      //     : FileImage(_selectedImage!),
-                      // foregroundImage:
-                      //     AssetImage('assets/images/group_default_image.png'),
 
                       radius: 27,
                     ),
@@ -276,7 +222,6 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
               ],
             ),
             const SizedBox(height: 16),
-
             FutureBuilder(
               future: _loadedItems,
               builder: (context, snapshot) {
@@ -290,9 +235,7 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
                 } else {
                   final snapshotData = snapshot.data;
                   if (snapshotData!.isNotEmpty) {
-                    // return CreateChat
                     // 이제 여기서 listview를 구현해서 하나씩의 전체 userData를 bakcend로 보내 주기.
-                    // return CreateChatGroupItem(userId: snapshotData.)
                     return Expanded(
                       child: ListView.builder(
                         itemCount: snapshotData.length,
@@ -310,33 +253,6 @@ class _CreateChatGroupScreenState extends State<CreateChatGroupScreen> {
                 }
               },
             )
-
-            ///// ㄱㄱ 아래 코드 작동
-            // FutureBuilder(
-            //     future: FirebaseFirestore.instance.collection('users').get(),
-            //     builder: (context, snapshot) {
-            //       if (snapshot.connectionState == ConnectionState.waiting) {
-            //         return const Center(
-            //           child: CircularProgressIndicator(),
-            //         );
-            //       }
-            //       if (snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            //         // return const CreateChatGroupItem(),
-            //         final docs = snapshot.data!.docs;
-
-            //         return Expanded(
-            //           child: ListView.builder(
-            //               itemCount: docs.length,
-            //               itemBuilder: (ctx, index) =>
-            //                   CreateChatGroupItem(userId: docs[index].id)),
-            //         );
-            //       } else {
-            //         return const Text('No members');
-            //       }
-            //     })
-
-            // ㄴㄴㄴ 위에 코드 작동
-            // )
           ],
         ),
       ),

@@ -243,10 +243,8 @@ class Util {
           .child('chat_images')
           .child(groupId)
           .child('${uuid.v4()}.jpg');
-      // await storageRef.
       await storageRef.putFile(imageFile!);
       final imageUrl = await storageRef.getDownloadURL();
-      // return imageUrl;
       await sendChatCommon(groupId: groupId, imageUrl: imageUrl);
     }
   }
@@ -264,10 +262,6 @@ class Util {
     for (final chatDataDoc in chatCollectionDataList.docs) {
       final id = chatDataDoc.id;
       final data = chatDataDoc.data();
-      // if (data['readby']) print(data);
-      // data['readby'].contains(currentUserData['id']) ? return :
-
-      // if chat > 'readBy' doesn't have currentUserId, then it should be added
 
       if (!data['readBy'].contains(currentUserData!['id'])) {
         // await chatDataDoc.data().update(key, (value) => null)
@@ -367,51 +361,4 @@ class Util {
 
     return groupTitle;
   }
-
-  ////////////////// 위는 추가로 생성 중인 세부 utils
-  ///
-
-  // Future<String> getGroupId(List<dynamic> usersUids, String groupTitle) async {
-  //   String? groupId = '';
-
-  //   /// 1. If user's collection's group field is empty, then create a new group
-  //   final userUid = firebaseUtils.currentUserUid;
-  //   final usersData = await firebaseUtils.usersData(userUid);
-
-  //   if (usersData!['group'].isEmpty) {
-  //     // create a new group, and return with created a group id
-  //     groupId = await createGroup(usersUids, groupTitle);
-  //     return groupId;
-  //   }
-
-  //   // 2-1. Find a group containing both user, and opponent userids in groups collection
-  //   final groupCollectionDocuments = await firebaseUtils.groupsCollection.get();
-  //   final matchedGroup =
-  //       groupCollectionDocuments.docs.where((groupCollectionDocument) {
-  //     if (groupCollectionDocument.data()['type'] == 1) {
-  //       return groupCollectionDocument
-  //               .data()['members']
-  //               .contains(usersUids[0]) &&
-  //           groupCollectionDocument.data()['members'].contains(usersUids[1]);
-  //     } else {
-  //       if (usersUids.length ==
-  //           groupCollectionDocument.data()['members'].length) {
-  //         return usersUids.every((userId) =>
-  //             groupCollectionDocument.data()['members'].contains(userId));
-  //       } else {
-  //         return false;
-  //       }
-  //     }
-  //   }).toList();
-
-  //   // 2-1-1. If the group is found, get exist group Id
-  //   if (matchedGroup.isNotEmpty) {
-  //     // final matchedGroupId = matchedGroup[0].id;
-  //     groupId = matchedGroup[0].id;
-  //   } else {
-  //     // 2-1-2. If failed to find a group containing both user, and opponent id, create a new group
-  //     groupId = await createGroup(usersUids, groupTitle);
-  //   }
-  //   return groupId;
-  // }
 }

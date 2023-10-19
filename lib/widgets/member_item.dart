@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:share_talks/main.dart';
 import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/screens/user_profile.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
@@ -9,7 +8,6 @@ import 'package:share_talks/utilities/util.dart';
 final firebaseUtils = FirebaseUtils();
 
 class MemberItem extends StatefulWidget {
-  // final QueryDocumentSnapshot<Map<String, dynamic>> userData;
   final Map<String, dynamic> userData;
 
   const MemberItem({Key? key, required this.userData}) : super(key: key);
@@ -66,8 +64,6 @@ class _MemberItemState extends State<MemberItem> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ChatScreen(
-          // groupTitle: _chatGroupNameController.text.trim(),
-          // groupId: groupId,
           groupData: groupData,
           groupTitle: groupTitle,
         ),
@@ -81,21 +77,17 @@ class _MemberItemState extends State<MemberItem> {
       height: 65,
       child: Center(
         child: ListTile(
-          // onTap: onClickMember,
           onTap: onClickAvatar,
           leading: CircleAvatar(
             foregroundImage: NetworkImage(widget.userData['image_url']),
             // foregroundImage: NetworkImage(widget.userData['image_url']),
             radius: 20,
           ),
-          // if (widget.userData['statusMessage'])
           subtitle: widget.userData['statusMessage'].trim().isEmpty
               ? null
               : Text(widget.userData['statusMessage']),
-          // isThreeLine: true,
           title: Text(
             widget.userData['username'],
-            // widget.userData['username'],
             style: const TextStyle(fontSize: 16),
           ),
         ),

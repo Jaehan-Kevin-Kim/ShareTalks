@@ -21,9 +21,7 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
         TextButton(
           child: const Text('Okay'),
           onPressed: () {
-            print('click');
             Get.back();
-            // Navigator.of(context).pop();
           },
         ),
       ],

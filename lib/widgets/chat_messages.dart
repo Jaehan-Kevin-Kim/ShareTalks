@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:share_talks/screens/chat.dart';
 import 'package:share_talks/utilities/firebase_utils.dart';
 import 'package:share_talks/utilities/util.dart';
 import 'package:share_talks/widgets/message_bubble.dart';
@@ -21,15 +20,6 @@ class ChatMessages extends StatefulWidget {
 class _ChatMessagesState extends State<ChatMessages> {
   /// 여기서 이제 message가 있는 지 확인 하고, 없으면 새로운 message 생성하는 logic 만들기
   // 1. messages 라는 collection이 있는 지 확인
-
-  // message라는 collection이 없는 상태에서 groupId로 찾을 수 있는 logic이 가능한지 확인 해 보기
-
-  // @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   super.initState();
-  // }
-  final StreamController _streamController = StreamController();
 
   @override
   void didUpdateWidget(covariant ChatMessages oldWidget) {
@@ -103,12 +93,9 @@ class _ChatMessagesState extends State<ChatMessages> {
           itemCount: loadedMessage.length,
           itemBuilder: (ctx, index) {
             final chatMessage = loadedMessage[index].data();
-            // Text(loadedMessage[index].data()['text']));
             final nextChatMessage = index + 1 < loadedMessage.length
                 ? loadedMessage[index + 1].data()
                 : null;
-            // final previousChatMessage =
-            //     index > 0 ? loadedMessage[index - 1].data() : null;
 
             final currentMessageUserId = chatMessage['senderId'];
             final nextMessageUserId =
@@ -119,15 +106,6 @@ class _ChatMessagesState extends State<ChatMessages> {
                 ? nextChatMessage['createdAt'].toDate()
                 : null;
 
-            // final previousChatMessageCreatedDate = previousChatMessage != null
-            //     ? previousChatMessage['createdAt'].toDate()
-            //     : null;
-
-            // //  Check if a date divider is nedded
-            // bool showDateDivider = previousChatMessageCreatedDate == null ||
-            //     chatMessage['createdAt'].toDate().day !=
-            //         previousChatMessageCreatedDate.day;
-            //  Check if a date divider is nedded
             bool showDateDivider = nextChatMessageCreatedDate == null ||
                 chatMessage['createdAt'].toDate().day !=
                     nextChatMessageCreatedDate.day;
@@ -135,7 +113,7 @@ class _ChatMessagesState extends State<ChatMessages> {
             final int notReadMemberNumbers =
                 widget.groupData['members'].length -
                     chatMessage['readBy'].length;
-            print(notReadMemberNumbers);
+            // print(notReadMemberNumbers);
 
             return Column(
               children: [
@@ -183,16 +161,6 @@ class _ChatMessagesState extends State<ChatMessages> {
               ],
             );
           },
-
-          // itemBuilder: ((context, index) {
-          //   return Column(
-          //     children: [
-          //       Text('${loadedMessage[index]['senderName']}: '),
-          //       Text(loadedMessage[index]['text']),
-          //       Text('groupid: ${widget.groupId}')
-          //     ],
-          //   );
-          // }),
         );
       }),
     );

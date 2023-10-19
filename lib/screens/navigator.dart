@@ -25,7 +25,6 @@ class _NavigatorScreenState extends State<NavigatorScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _selectedPageIndex = widget.selectedPageIndex;
     setupPushNotification();
@@ -62,9 +61,6 @@ class _NavigatorScreenState extends State<NavigatorScreen> {
           currentIndex: _selectedPageIndex,
           items: const [
             BottomNavigationBarItem(
-              // type
-              // showSelectedLabels: false,
-
               icon: Icon(
                 Icons.person_outline,
                 size: 25,

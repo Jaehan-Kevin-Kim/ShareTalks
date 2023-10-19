@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_talks/controller/auth_controller.dart';
@@ -119,27 +117,20 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
 
   void _deleteUserAccount() async {
     try {
-      // final result = reAuthenticate();
-      // await firebaseUtils
-      //     .usersDoc(firebaseUtils.currentUserUid)
-      //     .update({'active': false, 'updatedAt': Timestamp.now()});
       setState(() {
         isLoading = true;
       });
+
+      // Need to re-authenticate user for deleting a user request.
       await authController.login(
           FirebaseAuth.instance.currentUser!.email!, passwordController.text);
       await Util().deleteUser();
 
       // Also disable all groups having this user as a member
       // Finally remove user's id from all users having this user's id as their favorites.
-
-      // await FirebaseAuth.instance.currentUser!.delete();
       await authController.deleteAccount();
 
       await authController.signOut();
-      // FirebaseAuth.instance.signOut();
-      // userController.removeCurrentUserData();
-      // returnToAuthScreen();
     } on FirebaseException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -166,29 +157,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         content: Text(error.message ?? 'Authentication failed'),
       ));
     }
-    // email: FirebaseAuth.instance.currentUser!.email,
-    // email: FirebaseAuth.instance.currentUser!.email,
-
-    // EmailAuthProvider.credential(user.email, currentPassword);
-    // return user.reauthenticateWithCredential(cred);
   }
-
-  // void alertSnackBar(String titleText) {
-  //   ScaffoldMessenger.of(context).clearSnackBars();
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     // SnackBar(content: Text("Password is wrong")),
-  //     // ),
-  //     SnackBar(
-  //       padding: EdgeInsets.zero,
-  //       behavior: SnackBarBehavior.floating,
-  //       content: SnackBarContent(
-  //         titleText: titleText,
-  //         snackbarType: SnackbarType.error,
-  //         onActionTap: () {},
-  //       ),
-  //     ),
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {

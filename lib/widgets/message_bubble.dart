@@ -58,69 +58,8 @@ class MessageBubble extends StatelessWidget {
     showModalBottomSheet(
         isScrollControlled: true,
         context: context,
-        builder: (ctx) => FullScreenImage(image: image)
-        // SafeArea(
-        //       child: Column(
-        //         children: [
-        //           Container(
-        //             height: 80,
-        //             alignment: Alignment.bottomLeft,
-        //             color: Colors.white,
-        //             child: IconButton(
-        //               onPressed: () {
-        //                 Navigator.of(ctx).pop();
-        //               },
-        //               iconSize: 25,
-        //               icon: const Icon(Icons.close),
-        //             ),
-        //           ),
-        //           SizedBox(
-        //             width: MediaQuery.of(context).size.width,
-        //             height: MediaQuery.of(context).size.height - 160,
-        //             child: Image.network(
-        //               chatImage,
-        //               fit: BoxFit.contain,
-        //             ),
-        //           ),
-        //           Container(height: 80, color: Colors.white)
-        //         ],
-        //       ),
-        //     )
-        );
+        builder: (ctx) => FullScreenImage(image: image));
   }
-
-  // void onTapImage(BuildContext context) {
-  //   showModalBottomSheet(
-  //       isScrollControlled: true,
-  //       context: context,
-  //       builder: (ctx) => SafeArea(
-  //             child: Column(
-  //               children: [
-  //                 Container(
-  //                   height: 80,
-  //                   alignment: Alignment.bottomLeft,
-  //                   color: Colors.white,
-  //                   child: IconButton(
-  //                     onPressed: () {
-  //                       Navigator.of(ctx).pop();
-  //                     },
-  //                     iconSize: 25,
-  //                     icon: const Icon(Icons.close),
-  //                   ),
-  //                 ),
-  //                 SizedBox(
-  //                   width: MediaQuery.of(context).size.width,
-  //                   height: MediaQuery.of(context).size.height - 160,
-  //                   child: Image.network(
-  //                     chatImage,
-  //                     fit: BoxFit.contain,
-  //                   ),
-  //                 ),
-  //                 Container(height: 80, color: Colors.white)
-  //               ],
-  //             ),
-  //           ));
-  // }
 
   @override
   Widget build(BuildContext context) {

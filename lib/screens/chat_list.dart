@@ -24,47 +24,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
-
-  // Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
-  //     getInitialGroupsData() async {
-//   Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
-//       getInitialGroupsData() async {
-// // await FirebaseFirestore.instance.collection('groups').snapshots().where((event)  { event.docs})
-
-//     final sortByUpdatedAtCollection = FirebaseFirestore.instance
-//         .collection('groups')
-//         .orderBy('updatedAt', descending: true);
-//     // .snapshots();
-
-//     //   final groupsHavingCurrntUser = sortByUpdatedAtCollection.where((doc) {
-//     //      final groupDocumentData = doc.
-//     // // final groupHavingCurrentUser =
-//     // return groupDocumentData['members']
-//     //     .contains(firebaseUtils.currentUserUid);
-//     //   })
-//     final groupsCollectionDocuments = await sortByUpdatedAtCollection.get();
-//     final groupsHavingCurrentUser = groupsCollectionDocuments.docs.where((doc) {
-//       final groupDocumentData = doc.data();
-//       // final groupHavingCurrentUser =
-//       return groupDocumentData['members']
-//           .contains(firebaseUtils.currentUserUid);
-//     }).toList();
-//     print('groupsHavingCurrentUser: $groupsHavingCurrentUser');
-
-//     // final StreamController<QueryDocumentSnapshot<Map<String, dynamic>>>
-//     //     controller = StreamController<
-//     //         QueryDocumentSnapshot<Map<String, dynamic>>>.broadcast();
-
-//     // for (final group in groupsHavingCurrentUser) {
-//     //   controller.add(group);
-//     // }
-//     return groupsHavingCurrentUser;
-
-//     // return controller.stream;
-//   }
 
   void _createChatGroup() {
     Navigator.of(context).push(
@@ -98,16 +59,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
         chatTitle = opponentUserData['username'];
       }
 
-      // if (groupData['type'] == GroupChatType.self.index) {
-      //   // 여기는 내 정보 불러와서 나의 username을 기재 해야 함. (내 정보는 그냥 get으로 넣어둘지 고민 됨)
-      //   // chatTitle =
-      //   final myUserData =
-      //       await firebaseUtils.usersData(firebaseUtils.currentUserUid);
-
-      //   chatTitle = myUserData!['username']!;
-      //   avatarImage = NetworkImage(myUserData['imageUrl']);
-      // }
-
       groupData.addAll({'avatarImage': avatarImage, 'chatTitle': chatTitle});
       updatedGroupsData.add(groupData);
     }
@@ -116,8 +67,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final message = ModalRoute.of(context)!.settings.arguments;
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -145,7 +94,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
             );
           }
 
-          // if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
           final groups = snapshot.data!.docs;
 
           return FutureBuilder<List<Map<String, dynamic>>>(
@@ -153,34 +101,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
               builder: (context, groupDataSnapshot) {
                 if (groupDataSnapshot.connectionState ==
                     ConnectionState.waiting) {
-                  // setState(() {
-                  //   isChildrenLoading = true;
-                  // });
-                  // progress
                   return const Center(child: CircularProgressIndicator());
                 }
 
                 print(groupDataSnapshot.data);
 
                 final newGroupsData = groupDataSnapshot.data!;
-                // print(groupDataSnapshot.data!.docs);
-                // return Text('');
-                // if (snapshot.hasData && !snapshot.data.isNull) {
-                // final Map<String, dynamic> additionalGroupData =
-                //     snapshot.data;
-                // print(snapshot.data!['avatarImage']);
-                // setState(() {
-                // });
-                // isChildrenLoading = false;
 
                 return ListView.builder(
                   itemCount: newGroupsData.length,
                   itemBuilder: (ctx, index) {
-                    // return Text('');
                     return ChatListItem(
                       groupData: groups[index].data(),
-                      // groupId: newGroupsData[index].data()['id'],
-
                       avatarImage: newGroupsData[index]['avatarImage'],
                       chatTitle: newGroupsData[index]['chatTitle'],
                     );
@@ -188,84 +120,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   },
                 );
               });
-
-          // return ListView.builder(
-          //     itemCount: groups.length,
-          //     itemBuilder: (ctx, index) {
-          //       return FutureBuilder<Map<String, dynamic>>(
-          //         future: getListItemData(groups[index].data()),
-          //         builder: (context, groupDataSnapshot) {
-          //           if (groupDataSnapshot.connectionState ==
-          //               ConnectionState.waiting) {
-          //             // setState(() {
-          //             //   isChildrenLoading = true;
-          //             // });
-          //             progress
-          //             return const Center(child: CircularProgressIndicator());
-          //           }
-
-          //           print(groupDataSnapshot.data);
-          //           // print(groupDataSnapshot.data!.docs);
-          //           // return Text('');
-          //           // if (snapshot.hasData && !snapshot.data.isNull) {
-          //           // final Map<String, dynamic> additionalGroupData =
-          //           //     snapshot.data;
-          //           // print(snapshot.data!['avatarImage']);
-          //           // setState(() {
-          //           // });
-          //           // isChildrenLoading = false;
-          //           return ChatListItem(
-          //             groupData: groups[index].data(),
-          //             // groupId: groups[index].data()['id'],
-          //             avatarImage: groupDataSnapshot.data!['avatarImage'],
-          //             chatTitle: groupDataSnapshot.data!['chatTitle'],
-          //           );
-          //           // }
-          //         },
-          //       );
-          //     });
-          // }
-          // if (isChildrenLoading) {
-          // return const Center(child: CircularProgressIndicator());
-          // }
-
-          // itemBuilder: (ctx, index) {
-          //   final groupData = groups[index].data();
-          //   ImageProvider<Object>? avatarImage;
-          //   String? chatTitle = groupData['title'];
-
-          //   if (groupData['type'] == GroupChatType.single.index) {
-          //     final oppositeUserUid = groupData['members'].firstWhere(
-          //         (member) => member != firebaseUtils.currentUserUid);
-          //     firebaseUtils.usersData(oppositeUserUid).then((data) {
-          //       avatarImage = NetworkImage(data!['image_url']);
-          //       chatTitle = data['username'];
-          //     });
-          //   }
-          //   if (groupData['image_url'] != null) {
-          //     avatarImage = NetworkImage(groupData['image_url']);
-          //   } else {
-          //     avatarImage =
-          //         const AssetImage('assets/images/group_default_image.png');
-          //   }
-          //   if (groupData['type'] == GroupChatType.self.index) {
-          //     // 여기는 내 정보 불러와서 나의 username을 기재 해야 함. (내 정보는 그냥 get으로 넣어둘지 고민 됨)
-          //     // chatTitle =
-          //     firebaseUtils
-          //         .usersData(firebaseUtils.currentUserUid)
-          //         .then((data) {
-          //       chatTitle = data!['username'];
-          //       avatarImage = NetworkImage(data['imageUrl']);
-          //     });
-          //   }
-
-          //   return ChatListItem(
-          //     groupData: groupData,
-          //     // groupId: groups[index].data()['id'],
-          //     avatarImage: avatarImage,
-          //     chatTitle: chatTitle!,
-          //   );
-          // });
         }),
       ),
     );

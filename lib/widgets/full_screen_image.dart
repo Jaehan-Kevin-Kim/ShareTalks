@@ -7,15 +7,12 @@ class FullScreenImage extends StatefulWidget {
   final Image image;
   final bool isSendButtonRequired;
   final void Function(bool isButtonClick)? onButtonClick;
-  // final double safeAreaHeight;
 
   const FullScreenImage({
     super.key,
     required this.image,
     this.isSendButtonRequired = false,
     this.onButtonClick,
-
-    // required this.safeAreaHeight
   });
 
   @override
@@ -24,12 +21,8 @@ class FullScreenImage extends StatefulWidget {
 
 class _FullScreenImageState extends State<FullScreenImage> {
   bool isSending = false;
-  // bool isSending = false;
   @override
   Widget build(BuildContext context) {
-    // double safeAreaHeightinHere = MediaQuery.of(context).padding.top +
-    //     MediaQuery.of(context).padding.bottom;
-
     return Column(
       children: [
         Container(

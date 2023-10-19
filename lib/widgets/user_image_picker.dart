@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:share_talks/utilities/image_util.dart';
 import 'package:share_talks/widgets/camera_options.dart';
 
@@ -34,30 +33,6 @@ class _UserImagePickerState extends State<UserImagePicker> {
     );
     widget.onSelectedImage(_selectedImage!);
   }
-
-/*
-  void _getImage(bool isCameraSelected) async {
-    final imagePicker = ImagePicker();
-    final pickedImage = isCameraSelected
-        ? await imagePicker.pickImage(
-            source: ImageSource.camera, imageQuality: 80, maxWidth: 500
-            // source: ImageSource.camera, imageQuality: 80, maxWidth: 500
-            )
-        : await imagePicker.pickImage(
-            source: ImageSource.gallery, imageQuality: 80, maxWidth: 500);
-    // final highResolutionImage = decodeImage
-    if (pickedImage == null) {
-      return;
-    }
-
-    setState(
-      () {
-        _selectedImage = File(pickedImage.path);
-      },
-    );
-    widget.onSelectedImage(_selectedImage!);
-  }
-  */
 
   void cameraOption() {
     showModalBottomSheet(

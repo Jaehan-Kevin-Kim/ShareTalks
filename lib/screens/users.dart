@@ -17,8 +17,6 @@ class _UsersState extends State<Users> {
   String groupId = '';
   @override
   void initState() {
-    // TODO: implement initState
-
     super.initState();
     final userUid = FirebaseAuth.instance.currentUser!.uid;
     userDoc = fBF.collection('users').doc(userUid);
@@ -57,7 +55,6 @@ class _UsersState extends State<Users> {
     final opponentUser = fBF.collection('users').doc(opponentUid);
     final userGet = await fBF.collection('users').doc(userUid).get();
     if (userGet.data()!['group'].isEmpty) {
-      print('true');
       // 1-1. 새로 group 생성 하기.
       final createdGroup = await fBF.collection('groups').add({
         'members': [userUid, opponentUid],
@@ -81,8 +78,6 @@ class _UsersState extends State<Users> {
 
     //
 
-///////////////////////////////////////////////////////////////
-
 // 2. 만약 user의 group 이 empty array 가 아니면,
     else {
 //  final userGetData = userGet.data()!['group'];
@@ -102,37 +97,7 @@ class _UsersState extends State<Users> {
     if (!matchedGroup.isEmpty) {
       final matchedGroupId = matchedGroup[0].id;
       groupId = matchedGroup[0].id;
-      print('next');
     }
-
-    // 2-1-2. 만약 group중 userUid와 opponentUid를 동시에 가지고 있는 group이 없는 경우, 새로 group 생성하기
-    // // groupCollectionDocuments.
-    // for (final groupCollectionDocument in groupCollectionDocuments.docs) {
-    //   final abc = groupCollectionDocument.data()['members'].contains(userUid);
-    //   final def =
-    //       groupCollectionDocument.data()['members'].contains(opponentUid);
-
-    //   print(abc == def);
-    //   // final List<String> abc = [];
-    //   // abc.contains(element)
-    // }
-
-    print('next');
-    // groupCollectionWithGet.docs()
-
-    // initiall if no group collection, then create group
-    // await groupCollection
-
-    // groupCollection.docs.forEach((result) {
-    //   FirebaseFirestore.instance
-    //       .collection('group')
-    //       .doc(result.id)
-    //       .get()
-    //       .then((value) {
-    //     value.data();
-    //     print(value.data());
-    //   });
-    // });
   }
 
   @override

@@ -32,8 +32,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    // final AuthController authController = Get.put(AuthController());
-
     final UserController userController = Get.put(UserController());
     return GetMaterialApp(
       scaffoldMessengerKey: rootScaffoldMessengerKey,
@@ -45,15 +43,6 @@ class MyApp extends StatelessWidget {
             seedColor: const Color.fromARGB(255, 63, 17, 177)),
       ),
       navigatorKey: navigatorKey,
-      // home: Obx(() {
-      //   final user = authController.currentUser;
-      //   if (user.value == null) {
-      //     return const AuthScreen();
-      //   } else {
-      //     return const NavigatorScreen();
-      //   }
-      // })
-
       home: StreamBuilder(
         stream: FirebaseAuth.instance.userChanges(),
         builder: ((context, snapshot) {

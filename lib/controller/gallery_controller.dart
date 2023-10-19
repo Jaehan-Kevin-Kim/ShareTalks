@@ -32,22 +32,8 @@ class GalleryController extends GetxController {
           .where((imageWithIndex) => imageWithIndex['index'] != index)
           .toList();
     }
-    // final isIndexExist =
-    //     selectedIndexList.firstWhereOrNull((listIndex) => listIndex == index);
-    // if (isIndexExist == null) {
-    //   currentSelectedImageIndex++;
-    //   selectedIndexList.add(index);
-    //   selectedImages.add(image);
-    // } else {
-    //   currentSelectedImageIndex--;
-    //   selectedIndexList.remove(index);
-    // }
   }
 
-  // void deselectImage(int index) {
-  //   currentSelectedImageIndex--;
-  //   selectedIndexList.remove(index);
-  // }
   void emptyIndexList() {
     selectedIndexList.value = [];
     selectedImagesWithIndexes.value = [];

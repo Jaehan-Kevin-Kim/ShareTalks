@@ -40,37 +40,5 @@ class _CreateChatGroupItemState extends State<CreateChatGroupItem> {
         widget.isSelected(widget.userData['id'], value);
       },
     );
-
-    // FutureBuilder(
-    // future: firebaseUtils.usersData(widget.userId),
-    // builder: (context, snapshot) {
-    //   if (snapshot.connectionState == ConnectionState.waiting) {
-    //     return const Center(
-    //       child: LinearProgressIndicator(),
-    //     );
-    //   }
-    //   if (snapshot.hasData) {
-    //     final userData = snapshot.data!;
-    //     return GFCheckboxListTile(
-    //       titleText: userData['username'],
-    //       value: checkBoxValue,
-    //       onChanged: (value) {
-    //         setState(() {
-    //           checkBoxValue = value;
-    //         });
-    //       },
-    //     );
-    // return CheckboxListTile(
-    //   leading
-    //     title: Text(userData['username']),
-    //     value: checkBoxValue,
-    //     onChanged: (value) {
-    //       setState(() {
-    //         checkBoxValue = value!;
-    //       });
-    //     });
-    //   }
-    //   return Text('');
-    // });
   }
 }

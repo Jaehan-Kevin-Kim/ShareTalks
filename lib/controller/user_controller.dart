@@ -7,7 +7,6 @@ import 'package:share_talks/utilities/firebase_utils.dart';
 final firebaseUtils = FirebaseUtils();
 
 class UserController extends GetxController {
-  // RxMap<String, dynamic>?>? currentUserData;
   final currentUserData = RxMap<String, dynamic>({});
   RxList<QueryDocumentSnapshot<Map<String, dynamic>>> users =
       RxList<QueryDocumentSnapshot<Map<String, dynamic>>>();
@@ -33,10 +32,6 @@ class UserController extends GetxController {
     if (FirebaseAuth.instance.currentUser != null) {
       updateCurrentUserData(FirebaseAuth.instance.currentUser!.uid);
     }
-    // FirebaseAuth.instance.userChanges().listen((user) {
-    //   print(user);
-    //   return null;
-    // });
   }
 
   // Code to update user's data
@@ -57,15 +52,10 @@ class UserController extends GetxController {
 
     final usersGet =
         await FirebaseFirestore.instance.collection('users').doc(userUid).get();
-    print(usersGet.data());
     if (usersGet.data() != null) {
       currentUserData.value = usersGet.data()!;
     }
-    // currentUserData.value =
-    //     await FirebaseFirestore.instance.collection('user').usersData(userUid);
-    print(currentUserData);
     statusController.updateLoadingStatus(false);
-    // Get.to(() => const MyApp());
   }
 
   void removeCurrentUserData() {

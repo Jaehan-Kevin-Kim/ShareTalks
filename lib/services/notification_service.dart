@@ -23,9 +23,7 @@ class NotificationService {
     await notificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse:
-          (NotificationResponse notificationResonse) async {
-        print('click');
-      },
+          (NotificationResponse notificationResonse) async {},
     );
   }
 

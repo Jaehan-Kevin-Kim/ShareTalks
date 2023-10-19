@@ -1,16 +1,8 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_talks/controller/status_controller.dart';
 import 'package:share_talks/controller/user_controller.dart';
-import 'package:share_talks/main.dart';
 import 'package:share_talks/screens/auth.dart';
-import 'package:share_talks/utilities/util.dart';
-
-import '../screens/navigator.dart';
 
 class AuthController extends GetxController {
   static AuthController instance = Get.find();
